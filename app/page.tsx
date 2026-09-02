@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Partners from "@/components/Partners";
+import References from "@/components/References";
+import Services from "@/components/Services";
 
 export default function Home() {
   return (
@@ -16,6 +18,8 @@ export default function Home() {
       <main className="flex-1">
         <About />
         <Benefits />
+        <Services />
+        <References />
         <Partners />
         <Contact />
       </main>

@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 const navItems = [
   { href: "#o-nas", label: "O nás" },
   { href: "#vyhody", label: "Výhody" },
+  { href: "#sluzby", label: "Služby" },
+  { href: "#referencie", label: "Referencie" },
   { href: "#partneri", label: "Partneri" },
   { href: "#kontakt", label: "Kontakt" },
 ];
@@ -52,7 +54,7 @@ export default function Header() {
           )}
         </a>
 
-        <nav className="hidden items-center gap-10 lg:flex" aria-label="Hlavná navigácia">
+        <nav className="hidden items-center gap-8 xl:flex" aria-label="Hlavná navigácia">
           {navItems.map((item) => (
             <a
               key={item.href}

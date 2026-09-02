@@ -1,3 +1,6 @@
+const missionText =
+  "Sme správcovská spoločnosť zameraná na správu bytových domov v Nitre. Bezprostredným podnetom k vzniku spoločnosti boli impulzy a myšlienky individuálneho prístupu k bytovým domom, pričom hlavným cieľom našich činností je komplexný komfort pre každého koncového užívateľa.";
+
 export default function About() {
   return (
     <section id="o-nas" className="section-cream scroll-mt-0 py-24 sm:py-32 lg:py-40">
@@ -7,10 +10,7 @@ export default function About() {
           Poslanie spoločnosti
         </h2>
         <p className="mt-12 text-base font-light leading-relaxed text-charcoal/75 sm:text-lg sm:leading-[1.9] lg:text-xl">
-          Sme správcovská spoločnosť zameraná na správu bytových domov v Nitre.
-          Bezprostredným podnetom k vzniku spoločnosti boli impulzy a myšlienky
-          individuálneho prístupu k bytovým domom, pričom hlavným cieľom našich
-          činností je komplexný komfort pre každého koncového užívateľa.
+          {missionText}
         </p>
       </div>
     </section>
