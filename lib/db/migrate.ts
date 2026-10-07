@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import { getSqlite } from "@/lib/db/client";
 import { getUploadDir } from "@/lib/db/paths";
 
@@ -16,6 +17,9 @@ const UPLOAD_SUBDIRS = [
 
 /** Apply SQL migrations from drizzle/ folder and ensure upload dirs exist. */
 export function runMigrations() {
+  if (isStaticPublicContent()) {
+    throw new Error("Database migrations are disabled in static public content mode.");
+  }
   const sqlite = getSqlite();
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS __drizzle_migrations (

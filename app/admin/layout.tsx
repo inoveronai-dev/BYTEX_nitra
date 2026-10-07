@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getCurrentAdmin } from "@/lib/auth/session";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "BYTEX Admin",
@@ -8,6 +12,10 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (isStaticPublicContent()) {
+    notFound();
+  }
+
   const admin = await getCurrentAdmin();
 
   // Login page renders without sidebar

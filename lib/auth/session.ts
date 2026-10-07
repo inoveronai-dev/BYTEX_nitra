@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { eq, lt } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import { getDb } from "@/lib/db/client";
 import { admins, sessions } from "@/lib/db/schema";
 import { runMigrations } from "@/lib/db/migrate";
@@ -32,6 +33,9 @@ function cookieSecure() {
 }
 
 export async function createSession(adminId: number, meta?: { ip?: string; userAgent?: string }) {
+  if (isStaticPublicContent()) {
+    throw new Error("Admin sessions are disabled in static public content mode.");
+  }
   runMigrations();
   const db = getDb();
   const token = randomBytes(32).toString("hex");
@@ -60,6 +64,17 @@ export async function createSession(adminId: number, meta?: { ip?: string; userA
 }
 
 export async function destroySession() {
+  if (isStaticPublicContent()) {
+    const cookieStore = await cookies();
+    cookieStore.set(SESSION_COOKIE, "", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: cookieSecure(),
+      path: "/",
+      maxAge: 0,
+    });
+    return;
+  }
   runMigrations();
   const cookieStore = await cookies();
   const raw = cookieStore.get(SESSION_COOKIE)?.value;
@@ -85,6 +100,7 @@ export type AuthAdmin = {
 };
 
 export async function getCurrentAdmin(): Promise<AuthAdmin | null> {
+  if (isStaticPublicContent()) return null;
   runMigrations();
   const cookieStore = await cookies();
   const raw = cookieStore.get(SESSION_COOKIE)?.value;

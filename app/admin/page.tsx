@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { PageHeader, Card } from "@/components/admin/ui";
 import { adminNav } from "@/lib/admin/nav";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import { getDb } from "@/lib/db/client";
 import { runMigrations } from "@/lib/db/migrate";
 import { services, siteReferences, documents } from "@/lib/db/schema";
 
 export default async function AdminDashboardPage() {
+  if (isStaticPublicContent()) notFound();
   runMigrations();
   const db = getDb();
   const serviceCount = db.select().from(services).all().length;

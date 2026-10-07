@@ -8,6 +8,7 @@ import {
   recordLoginFailure,
 } from "@/lib/auth/rate-limit";
 import { createSession } from "@/lib/auth/session";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import { getDb } from "@/lib/db/client";
 import { admins } from "@/lib/db/schema";
 import { runMigrations } from "@/lib/db/migrate";
@@ -18,6 +19,9 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (isStaticPublicContent()) {
+    return NextResponse.json({ error: "Not Found" }, { status: 404 });
+  }
   runMigrations();
   const body = await request.json().catch(() => null);
   const parsed = schema.safeParse(body);

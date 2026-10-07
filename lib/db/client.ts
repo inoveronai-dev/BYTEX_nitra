@@ -2,13 +2,23 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import * as schema from "@/lib/db/schema";
 import { getDatabasePath } from "@/lib/db/paths";
 
 let sqlite: Database.Database | null = null;
 let dbInstance: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
+function assertSqliteAllowed() {
+  if (isStaticPublicContent()) {
+    throw new Error(
+      "SQLite is disabled in static public content mode (Vercel). Use CMS_STORAGE_MODE=sqlite only on a local/VPS host."
+    );
+  }
+}
+
 export function getSqlite() {
+  assertSqliteAllowed();
   if (sqlite) return sqlite;
 
   const dbPath = getDatabasePath();

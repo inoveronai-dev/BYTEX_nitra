@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
+import { isStaticPublicContent } from "@/lib/content/storage-mode";
 import { getUploadDir } from "@/lib/db/paths";
 
 const MIME: Record<string, string> = {
@@ -17,6 +18,10 @@ export async function GET(
   _request: Request,
   context: { params: Promise<{ path: string[] }> }
 ) {
+  if (isStaticPublicContent()) {
+    return new NextResponse("Not found", { status: 404 });
+  }
+
   const { path: parts } = await context.params;
   if (!parts?.length) {
     return new NextResponse("Not found", { status: 404 });
