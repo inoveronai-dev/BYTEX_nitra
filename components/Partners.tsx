@@ -32,18 +32,18 @@ export default function Partners() {
           Spolupracujeme s overenými partnermi
         </h2>
 
-        <div className="mt-20 flex flex-wrap items-center justify-center gap-12 sm:gap-16 md:gap-20 lg:gap-28">
+        <div className="mt-20 grid grid-cols-1 items-center justify-items-center gap-10 sm:grid-cols-3 sm:gap-8 md:gap-12">
           {partners.map((partner) => (
             <div
               key={partner.src}
-              className="group relative flex h-20 w-40 items-center justify-center sm:h-24 sm:w-48 md:h-28 md:w-56"
+              className="group relative flex h-24 w-full max-w-[220px] items-center justify-center px-4"
             >
               <Image
                 src={partner.src}
                 alt={partner.alt}
                 width={partner.width}
                 height={partner.height}
-                className="max-h-full w-auto object-contain grayscale opacity-60 transition-all duration-500 group-hover:grayscale-0 group-hover:opacity-100"
+                className="max-h-20 w-auto object-contain grayscale opacity-55 transition-all duration-500 group-hover:grayscale-0 group-hover:opacity-100 sm:max-h-24"
               />
             </div>
           ))}

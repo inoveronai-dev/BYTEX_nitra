@@ -47,3 +47,31 @@ body {
 .hero-subtext-shadow {
   text-shadow: 0 1px 24px rgb(0 0 0 / 0.45);
 }
+
+.reveal-item {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-item--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .revision-item,
+  .revision-panel,
+  .revision-item * {
+    transition: none !important;
+  }
+}

@@ -7,6 +7,7 @@ const navItems = [
   { href: "#o-nas", label: "O nás" },
   { href: "#vyhody", label: "Výhody" },
   { href: "#sluzby", label: "Služby" },
+  { href: "#revizie", label: "Revízie" },
   { href: "#referencie", label: "Referencie" },
   { href: "#partneri", label: "Partneri" },
   { href: "#kontakt", label: "Kontakt" },

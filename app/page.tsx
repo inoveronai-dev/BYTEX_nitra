@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Partners from "@/components/Partners";
 import References from "@/components/References";
+import Revisions from "@/components/Revisions";
 import Services from "@/components/Services";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
         <About />
         <Benefits />
         <Services />
+        <Revisions />
         <References />
         <Partners />
         <Contact />
