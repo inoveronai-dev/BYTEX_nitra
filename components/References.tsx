@@ -9,22 +9,11 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-const references = [
-  { src: "/ref-1.jpg", address: "Ďurčanského 934/18, Nitra" },
-  { src: "/ref-2.jpg", address: "SVB Mikovíniho 18 a 20" },
-  { src: "/ref-3.jpg", address: "Beethovenova 450/2 - 4, Nitra" },
-  { src: "/ref-4.jpg", address: "Hlohovecká 826/1, Lužianky" },
-  { src: "/ref-5.jpg", address: "Jurkovičova 385/1, Nitra" },
-  { src: "/ref-6.jpg", address: "Za Humnami 511/2, Veľký Cetín" },
-];
+type ReferenceItem = { image: string; name: string };
 
-const COUNT = references.length;
 const FIRST_MOVE_MS = 1200;
 const AUTOPLAY_MS = 2000;
 const RESUME_MS = 1800;
-
-/** Triple the list so we can jump between clones without a visible reset. */
-const loopItems = [...references, ...references, ...references];
 
 function ArrowIcon({ direction }: { direction: "prev" | "next" }) {
   return (
@@ -38,7 +27,11 @@ function ArrowIcon({ direction }: { direction: "prev" | "next" }) {
   );
 }
 
-export default function References() {
+export default function References({ items = [] }: { items?: ReferenceItem[] }) {
+  const references = items.map((item) => ({ src: item.image, address: item.name }));
+  const COUNT = Math.max(references.length, 1);
+  const loopItems = [...references, ...references, ...references];
+
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{

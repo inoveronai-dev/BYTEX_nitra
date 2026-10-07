@@ -4,9 +4,13 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { SPLASH_DONE_EVENT, SPLASH_SESSION_KEY, SPLASH_TOTAL_MS } from "@/lib/splash";
 
-const headlineLines = ["Individuálny prístup", "k bytovým domom"];
-
-export default function Hero() {
+export default function Hero({
+  headlineLines = ["Individuálny prístup", "k bytovým domom"],
+  imageSrc = "/hero-bytex.jpg",
+}: {
+  headlineLines?: string[];
+  imageSrc?: string;
+}) {
   const [active, setActive] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
 
@@ -48,7 +52,7 @@ export default function Hero() {
         }`}
       >
         <Image
-          src="/hero-bytex.jpg"
+          src={imageSrc}
           alt="Obytná štvrť v Nitre so správou bytových domov"
           fill
           priority

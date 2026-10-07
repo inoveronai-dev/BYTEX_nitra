@@ -23,7 +23,16 @@ function InstagramIcon() {
   );
 }
 
-export default function Footer() {
+export default function Footer({
+  settings,
+}: {
+  settings?: { companyName: string; ico: string; dic: string; copyrightText: string } | null;
+}) {
+  const companyName = settings?.companyName || "BYTEX Nitra, s.r.o.";
+  const ico = settings?.ico || "55 420 401";
+  const dic = settings?.dic || "2122045123";
+  const copyrightText = settings?.copyrightText || "© 2026 BYTEX Nitra, s.r.o.";
+
   return (
     <footer className="relative overflow-hidden border-t border-gold/25 bg-charcoal-deep text-white">
       {/* Subtle brand watermark */}
@@ -38,14 +47,14 @@ export default function Footer() {
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between sm:gap-10">
           <div>
             <p className="text-sm font-light tracking-wide text-white/90">
-              BYTEX Nitra, s.r.o.
+              {companyName}
             </p>
             <p className="mt-1.5 text-xs font-light leading-relaxed text-white/45">
-              IČO: 55 420 401
+              IČO: {ico}
               <span className="mx-2 text-white/20" aria-hidden>
                 ·
               </span>
-              DIČ: 2122045123
+              DIČ: {dic}
             </p>
           </div>
 
@@ -80,7 +89,7 @@ export default function Footer() {
         </div>
 
         <p className="mt-6 border-t border-white/8 pt-5 text-xs font-light text-white/35">
-          © 2026 BYTEX Nitra, s.r.o.
+          {copyrightText}
         </p>
       </div>
     </footer>

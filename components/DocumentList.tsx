@@ -1,5 +1,6 @@
 import Reveal from "@/components/Reveal";
-import { documents } from "@/lib/downloads";
+
+type Doc = { title: string; href: string };
 
 function PdfIcon() {
   return (
@@ -22,7 +23,7 @@ function PdfIcon() {
   );
 }
 
-export default function DocumentList() {
+export default function DocumentList({ documents = [] }: { documents?: Doc[] }) {
   return (
     <ul className="mt-12 border-t border-black/[0.08] sm:mt-14">
       {documents.map((doc, index) => (

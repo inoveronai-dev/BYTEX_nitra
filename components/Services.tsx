@@ -3,58 +3,16 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
 
-const services: {
+type ServiceItem = {
   title: string;
   description: string;
   image: string;
-  imageClassName?: string;
-  imageOverlayClassName?: string;
-}[] = [
-  {
-    title: "Ekonomická činnosť",
-    description:
-      "Evidencia platieb a tvorba predpisov, upomínanie platieb v omeškaní, vedenie samostatného účtovníctva, založenie a vedenie bankových účtov pre jednotlivé objekty, ročné vyúčtovanie, poistenie nehnuteľnosti.",
-    image: "/service-1.jpg",
-    // Anchor crop to bottom-left so the calculator stays fully in frame
-    imageClassName: "object-left-bottom",
-    imageOverlayClassName: "bg-gradient-to-t from-[#111111]/25 via-transparent to-black/10",
-  },
-  {
-    title: "Technická činnosť",
-    description:
-      "Starostlivosť o stavebný a technický stav budov, periodické revízie, zabezpečenie projektových prác, inžinierskej činnosti a energetických certifikátov, zostavovanie ročných plánov opráv.",
-    image: "/service-2-tech-v2.jpg",
-    // Same source photo, reframed to clipboard/hands + technical bokeh (not portrait)
-    imageClassName: "object-center",
-    imageOverlayClassName: "bg-gradient-to-t from-[#111111]/40 via-transparent to-transparent",
-  },
-  {
-    title: "Prevádzková činnosť",
-    description:
-      "Kontrola nad všetkými prevádzkovými procesmi, s ktorými sa vlastníci denne priamo stretávajú. Zabezpečenie všetkých služieb spojených s prevádzkou bytových domov (upratovanie, dodávka tepla, TÚV, studenej vody, plynu, elektriny, odvoz a likvidácia odpadu, dezinfekcia, dezinsekcia, deratizácia).",
-    image: "/service-3.jpg",
-  },
-  {
-    title: "Havarijná služba",
-    description:
-      "Štandardne poskytovaná služba bez poplatku na bytovú jednotku. Službu zabezpečujú a vykonávajú externé spoločnosti s najvýhodnejšou cenou. Zásah vo sfére spoločných častí a spoločných zariadení bytového domu je hradený z fondu opráv a zásah v byte a týkajúci sa výlučne bytu je hradený vlastníkom bytu.",
-    image: "/service-4.jpg",
-  },
-  {
-    title: "Právna činnosť",
-    description:
-      "Informovanie vlastníkov o aktuálnych zmenách zákonov týkajúcich sa prevádzky objektu, vymáhanie nedoplatkov a zabezpečenie dobrovoľných dražieb, dozor nad užívaním nehnuteľnosti v súlade so zákonom.",
-    image: "/service-5.jpg",
-  },
-  {
-    title: "Upratovacia činnosť",
-    description:
-      "Ako správca bytových domov spolupracujeme s upratovacou firmou UP Cleaning prostredníctvom ktorej Vám vieme zabezpečiť upratovanie spoločných priestorov v bytovom dome za výhodné ceny.",
-    image: "/service-6.jpg",
-  },
-];
+  imageClassName?: string | null;
+  imageOverlayClassName?: string | null;
+};
 
-export default function Services() {
+export default function Services({ items = [] }: { items?: ServiceItem[] }) {
+  const services = items;
   return (
     <section id="sluzby" className="scroll-mt-24 bg-[#111111] py-24 text-cream sm:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">

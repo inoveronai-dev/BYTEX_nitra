@@ -1,9 +1,11 @@
+export const dynamic = "force-dynamic";
+
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import PricingRegister from "@/components/PricingRegister";
 import Reveal from "@/components/Reveal";
-import { pricingNote } from "@/lib/pricing";
+import { getContactPage, getPricing } from "@/lib/cms/queries";
 
 export const metadata: Metadata = {
   title: "Cenník – BYTEX Nitra",
@@ -12,6 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function PricingPage() {
+  const pricing = getPricing();
+  const { settings } = getContactPage();
+
   return (
     <>
       <Header />
@@ -19,22 +24,20 @@ export default function PricingPage() {
         <section className="section-cream pb-20 sm:pb-24 lg:pb-28">
           <div className="mx-auto max-w-5xl px-6 sm:px-8">
             <Reveal>
-              <p className="section-eyebrow">
-                CENNÍK
-              </p>
+              <p className="section-eyebrow">CENNÍK</p>
               <h1 className="font-serif text-3xl font-light tracking-tight text-charcoal-deep sm:text-4xl lg:text-5xl">
                 Cenník
               </h1>
               <p className="mt-4 text-sm font-light tracking-wide text-charcoal/60 sm:text-[0.95rem]">
-                {pricingNote}
+                {pricing.note}
               </p>
             </Reveal>
 
-            <PricingRegister />
+            <PricingRegister sections={pricing.sections} />
           </div>
         </section>
       </main>
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

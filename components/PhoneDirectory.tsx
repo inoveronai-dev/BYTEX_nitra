@@ -1,12 +1,13 @@
 import Image from "next/image";
 import Reveal from "@/components/Reveal";
-import {
-  emergencyContact,
-  servicePartners,
-  utilityCompanies,
-  type EmailLink,
-  type PhoneLink,
-} from "@/lib/phones";
+import type { EmailLink, PartnerEntry, PhoneLink, UtilityEntry } from "@/lib/phones";
+
+type Emergency = {
+  title: string;
+  image: string;
+  phone: PhoneLink;
+  email: EmailLink;
+} | null;
 
 function isTextLine(
   line: PhoneLink | EmailLink | { kind: "text"; text: string }
@@ -28,10 +29,19 @@ function ContactLine({ line }: { line: PhoneLink | EmailLink }) {
   );
 }
 
-export default function PhoneDirectory() {
+export default function PhoneDirectory({
+  emergencyContact = null,
+  servicePartners = [],
+  utilityCompanies = [],
+}: {
+  emergencyContact?: Emergency;
+  servicePartners?: PartnerEntry[];
+  utilityCompanies?: UtilityEntry[];
+}) {
   return (
     <div className="mt-12 space-y-16 sm:mt-14 sm:space-y-20">
       {/* Featured emergency */}
+      {emergencyContact ? (
       <Reveal>
         <article className="overflow-hidden rounded-2xl border border-gold/20 bg-charcoal-deep text-cream shadow-[0_16px_48px_rgb(0_0_0_/0.18)]">
           <div className="grid md:grid-cols-2">
@@ -77,6 +87,7 @@ export default function PhoneDirectory() {
           </div>
         </article>
       </Reveal>
+      ) : null}
 
       {/* Service partners */}
       <section aria-labelledby="servisni-partneri">
@@ -195,15 +206,17 @@ export default function PhoneDirectory() {
                       {company.name}
                     </h3>
                     <div className="mt-3 space-y-4">
-                      {company.groups.map((group, groupIndex) => (
+                      {(Array.isArray(company.groups) ? company.groups : []).map(
+                        (group, groupIndex) => (
                         <div key={`${company.name}-${groupIndex}`}>
-                          {group.title ? (
+                          {group?.title ? (
                             <p className="mb-1.5 text-xs font-light uppercase tracking-[0.18em] text-gold">
                               {group.title}
                             </p>
                           ) : null}
                           <div className="space-y-1">
-                            {group.lines.map((line, lineIndex) =>
+                            {(Array.isArray(group?.lines) ? group.lines : []).map(
+                              (line, lineIndex) =>
                               isTextLine(line) ? (
                                 <p
                                   key={`${company.name}-text-${lineIndex}`}

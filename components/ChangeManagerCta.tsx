@@ -12,26 +12,12 @@ import {
 import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 
-const introText =
-  "Pokiaľ ste sa už definitívne rozhodli, že ďalšia zmluvná spolupráca s doterajším správcom už nie je za žiadnych okolností možná, je potrebné zmluvný vzťah ukončiť. Aj v tomto treba byť obozretný a postupovať v súlade jednak s uzatvorenou a stále platnou zmluvou o výkone správy a jednak s príslušnými ustanoveniami Zákona o bytoch. Z hľadiska Zákona o bytoch majte na pamäti nasledujúce ustanovenia:";
-
-const quotes = [
-  {
-    text: '"Vlastníci bytov a nebytových priestorov v dome uzatvoria so správcom písomnú zmluvu o výkone správy. Zmluva o výkone správy, jej zmena alebo jej zánik sa schvaľuje nadpolovičnou väčšinou hlasov všetkých vlastníkov bytov a nebytových priestorov v dome. Schválená zmluva o výkone správy alebo jej zmena, alebo jej zánik je záväzný pre všetkých vlastníkov bytov a nebytových priestorov v dome, ak je podpísaný nadpolovičnou väčšinou vlastníkov bytov a nebytových priestorov v dome a správcom. Správca je povinný schválenú zmluvu alebo jej zmenu doručiť každému vlastníkovi bytu a nebytového priestoru v dome. Na doručovanie sa vzťahuje osobitný predpis. 12e) Zmluva o výkone správy obsahuje najmä"',
-    citation: "(§ 8a ods. 1 Zákona o bytoch).",
-  },
-  {
-    text: '"Zmluva o výkone správy sa uzatvára so správcom písomne na neurčitý čas. Vlastníci bytov a nebytových priestorov v dome môžu vypovedať zmluvu o výkone správy len na základe rozhodnutia podľa § 14. Výpovedná lehota je tri mesiace, ak sa zmluvné strany v zmluve o výkone správy nedohodnú inak. Výpovedná lehota začína plynúť od prvého dňa kalendárneho mesiaca nasledujúceho po doručení výpovede."',
-    citation: "(§ 8a ods. 6 Zákona o bytoch).",
-  },
-  {
-    text: '"Vlastník bytu alebo nebytového priestoru v dome má právo a povinnosť zúčastňovať sa na správe domu a hlasovaním rozhodovať ako spoluvlastník o spoločných častiach domu a spoločných zariadeniach domu, spoločných nebytových priestoroch, príslušenstve a pozemku na schôdzi vlastníkov. Oznámenie o schôdzi vlastníkov musí byť v písomnej forme doručené každému vlastníkovi bytu alebo nebytového priestoru v dome minimálne päť pracovných dní pred dňom konania schôdze. Výsledok hlasovania oznamuje ten, kto schôdzu vlastníkov alebo zhromaždenie zvolal, a to do piatich pracovných dní od konania schôdze vlastníkov alebo zhromaždenia spôsobom v dome obvyklým."',
-    citation: "(§ 14 ods. 1 Zákona o bytoch).",
-  },
-] as const;
-
-const downloadHref =
-  "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000036-533e4533e7/%C5%BDiados%C5%A5%20o%20zvolanie%20sch%C3%B4dze%20vlastn%C3%ADkov_odvolanie.doc?ph=d9651b25e0";
+type ChangeManagerData = {
+  intro: string;
+  quotes: Array<{ text: string; citation?: string }>;
+  downloadHref: string;
+  backgroundImage: string;
+} | null;
 
 function getFocusable(container: HTMLElement) {
   return Array.from(
@@ -66,10 +52,16 @@ function ChangeManagerModal({
   open,
   onClose,
   titleId,
+  introText,
+  quotes,
+  downloadHref,
 }: {
   open: boolean;
   onClose: () => void;
   titleId: string;
+  introText: string;
+  quotes: Array<{ text: string; citation?: string }>;
+  downloadHref: string;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -251,11 +243,16 @@ function ChangeManagerModal({
   );
 }
 
-export default function ChangeManagerCta() {
+export default function ChangeManagerCta({ data = null }: { data?: ChangeManagerData }) {
   const [open, setOpen] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
   const titleId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
+
+  const introText = data?.intro || "";
+  const quotes = data?.quotes || [];
+  const downloadHref = data?.downloadHref || "#";
+  const backgroundImage = data?.backgroundImage || "/change-manager-bg.jpg";
 
   const close = useCallback(() => {
     setOpen(false);
@@ -271,6 +268,8 @@ export default function ChangeManagerCta() {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
+
+  if (!data) return null;
 
   return (
     <>
@@ -292,7 +291,7 @@ export default function ChangeManagerCta() {
         >
           <div className="absolute inset-0 scale-[1.1]">
             <Image
-              src="/change-manager-bg.jpg"
+              src={backgroundImage}
               alt=""
               fill
               priority={false}
@@ -338,7 +337,14 @@ export default function ChangeManagerCta() {
         </div>
       </section>
 
-      <ChangeManagerModal open={open} onClose={close} titleId={titleId} />
+      <ChangeManagerModal
+        open={open}
+        onClose={close}
+        titleId={titleId}
+        introText={introText}
+        quotes={quotes}
+        downloadHref={downloadHref}
+      />
     </>
   );
 }

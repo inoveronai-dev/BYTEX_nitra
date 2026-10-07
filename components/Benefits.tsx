@@ -4,39 +4,34 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import Reveal from "@/components/Reveal";
 
-const benefits = [
-  {
-    text: "Seriózne a ústretové jednanie so všetkými vlastníkmi objektov - po dohode aj vo vlastnom bytovom dome.",
-    icon: MessageCircleCheckIcon,
-  },
-  {
-    text: "Pracujeme pre Vás nonstop 24 hodín denne a 7 dní v týždni.",
-    icon: ClockIcon,
-  },
-  {
-    text: "Úzka spolupráca s vlastníkmi bytov a spoločné prehodnocovanie potrebných investícií.",
-    icon: UsersIcon,
-  },
-  {
-    text: "Sústavná starostlivosť o komfort bývania.",
-    icon: HomeIcon,
-  },
-  {
-    text: "Pružnejšie a efektívnejšie vykonávanie jednotlivých opráv v dome odbornými pracovníkmi.",
-    icon: WrenchIcon,
-  },
-  {
-    text: "Predĺženie životnosti objektov pravidelnými kontrolami a z nich vyplývajúcimi údržbárskymi a servisnými prácami.",
-    icon: ShieldIcon,
-  },
-  {
-    text: "Informovanosť, komunikácia, oznamy, tlačivá, elektronické hlasovanie cez platformu Resitech.",
-    icon: DeviceIcon,
-    emphasize: true,
-  },
-];
+type BenefitItem = {
+  body: string;
+  iconKey: string;
+  emphasize?: boolean | null;
+};
 
-export default function Benefits() {
+function resolveBenefitIcon(key: string) {
+  const map: Record<string, () => ReactNode> = {
+    message: MessageCircleCheckIcon,
+    clock: ClockIcon,
+    users: UsersIcon,
+    home: HomeIcon,
+    wrench: WrenchIcon,
+    shield: ShieldIcon,
+    device: DeviceIcon,
+  };
+  return map[key] || MessageCircleCheckIcon;
+}
+
+export default function Benefits({ items }: { items?: BenefitItem[] }) {
+  const benefits =
+    items && items.length > 0
+      ? items.map((b) => ({
+          text: b.body,
+          icon: resolveBenefitIcon(b.iconKey),
+          emphasize: Boolean(b.emphasize),
+        }))
+      : [];
   return (
     <section id="vyhody" className="section-cream scroll-mt-24 py-24 sm:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">

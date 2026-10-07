@@ -1,15 +1,21 @@
 import ContactForm from "@/components/ContactForm";
 
-const hours = [
-  { day: "Pondelok", time: "Nestránkový deň", open: false },
-  { day: "Utorok", time: "14:00 - 18:00", open: true },
-  { day: "Streda", time: "Nestránkový deň", open: false },
-  { day: "Štvrtok", time: "14:00 - 18:00", open: true },
-  { day: "Piatok", time: "Nestránkový deň", open: false },
-];
+type ContactRow = {
+  person: string;
+  email: string;
+  phone: string;
+  phoneHref: string;
+  addressLine1: string;
+  addressLine2: string;
+  facebookUrl: string;
+  instagramUrl: string;
+  mapEmbedUrl: string;
+  clientCentreIntro: string;
+  formIntroBeforeEmail?: string;
+  formIntroAfterEmail?: string;
+} | null | undefined;
 
-const mapEmbedUrl =
-  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976!2d18.068075!3d48.305988!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sJurkovi%C4%8Dova+385%2F1%2C+Nitra%2C+949+11!5e0!3m2!1ssk!2sSK!4v1791377097000";
+type HourRow = { day: string; timeText: string; isOpen: boolean };
 
 function FacebookIcon() {
   return (
@@ -29,7 +35,25 @@ function InstagramIcon() {
   );
 }
 
-export default function Contact() {
+export default function Contact({
+  contact,
+  hours = [],
+}: {
+  contact?: ContactRow;
+  hours?: HourRow[];
+  settings?: unknown;
+}) {
+  const mapEmbedUrl = contact?.mapEmbedUrl || "";
+  const person = contact?.person || "";
+  const email = contact?.email || "";
+  const phone = contact?.phone || "";
+  const phoneHref = contact?.phoneHref || "";
+  const addressLine1 = contact?.addressLine1 || "";
+  const addressLine2 = contact?.addressLine2 || "";
+  const facebookUrl = contact?.facebookUrl || "#";
+  const instagramUrl = contact?.instagramUrl || "#";
+  const intro = contact?.clientCentreIntro || "";
+
   return (
     <section id="kontakt" className="section-cream scroll-mt-28 py-14 sm:scroll-mt-32 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
@@ -41,10 +65,7 @@ export default function Contact() {
               Klientske centrum
             </h2>
             <p className="mt-4 text-sm font-light leading-relaxed text-charcoal/75 sm:text-[0.95rem] sm:leading-[1.75]">
-              Klientske centrum umožňuje klientom rýchle a jednoduché vybavenie požiadaviek
-              spojených so správou bytových a nebytových priestorov na jednom mieste. Pracovník
-              centra poskytne radu a pomoc, prípadne usmerní majiteľov bytov na ďalší postup na
-              kompletné vybavenie Vašej žiadosti.
+              {intro}
             </p>
 
             <div className="mt-7 space-y-0 divide-y divide-black/[0.08] border-t border-black/[0.08]">
@@ -56,27 +77,27 @@ export default function Contact() {
                   Kontaktná osoba
                 </p>
                 <p className="mt-1.5 text-base font-normal text-charcoal-deep sm:text-lg">
-                  PaedDr. Michal Hudec, PhD.
+                  {person}
                 </p>
 
                 <div className="mt-4 flex flex-col gap-2">
                   <a
-                    href="mailto:bytexnitra@gmail.com"
+                    href={`mailto:${email}`}
                     className="text-sm font-light text-gold transition-colors duration-300 hover:text-gold-dark sm:text-base"
                   >
-                    bytexnitra@gmail.com
+                    {email}
                   </a>
                   <a
-                    href="tel:+421907615135"
+                    href={phoneHref}
                     className="text-sm font-light text-gold transition-colors duration-300 hover:text-gold-dark sm:text-base"
                   >
-                    +421 907 615 135
+                    {phone}
                   </a>
                 </div>
 
                 <div className="mt-4 flex items-center gap-3">
                   <a
-                    href="https://www.facebook.com/profile.php?id=61556337906214"
+                    href={facebookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/[0.08] text-charcoal/70 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
@@ -85,7 +106,7 @@ export default function Contact() {
                     <FacebookIcon />
                   </a>
                   <a
-                    href="https://www.instagram.com/bytex.nitra/?fbclid=IwAR2R9Dj4Br3B8hU6H4NV92IdCeWAaFBtK-RDpL0R50C-AOiAd5_RHCNvbVQ"
+                    href={instagramUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/[0.08] text-charcoal/70 transition-colors duration-300 hover:border-gold/40 hover:text-gold"
@@ -101,9 +122,9 @@ export default function Contact() {
                   Klientske centrum:
                 </h3>
                 <address className="mt-2 not-italic text-sm font-light leading-relaxed text-charcoal/75 sm:text-[0.95rem] sm:leading-[1.7]">
-                  Jurkovičova 385/1, 949 11 Nitra
+                  {addressLine1}
                   <br />
-                  Zvonček 050, 11. poschodie
+                  {addressLine2}
                 </address>
               </div>
 
@@ -120,12 +141,12 @@ export default function Contact() {
                       <span className="text-sm font-normal text-charcoal-deep">{row.day}:</span>
                       <span
                         className={
-                          row.open
+                          row.isOpen
                             ? "text-sm font-medium tracking-wide text-gold-dark"
                             : "text-sm font-light text-charcoal/50"
                         }
                       >
-                        {row.time}
+                        {row.timeText}
                       </span>
                     </li>
                   ))}
@@ -137,7 +158,11 @@ export default function Contact() {
           {/* Right: contact form — sticky only within this grid (stops before map) */}
           <div className="lg:col-span-7 lg:sticky lg:top-28">
             <div className="rounded-xl border border-black/[0.07] bg-[#fbfaf7] p-5 sm:p-6 lg:p-7">
-              <ContactForm />
+              <ContactForm
+                introBeforeEmail={contact?.formIntroBeforeEmail}
+                introAfterEmail={contact?.formIntroAfterEmail}
+                email={email}
+              />
             </div>
           </div>
         </div>

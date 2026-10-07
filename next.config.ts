@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["better-sqlite3", "bcrypt"],
+  images: {
+    localPatterns: [
+      { pathname: "/uploads/**" },
+      { pathname: "/**" },
+    ],
+  },
 };
 
 export default nextConfig;

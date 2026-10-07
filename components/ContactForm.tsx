@@ -4,9 +4,9 @@ import { useId, useState, type FormEvent } from "react";
 
 const requestOptions = ["Žiadosť", "Porucha", "Zaslanie potvrdenia"] as const;
 
-const introBeforeEmail =
+const defaultIntroBeforeEmail =
   'V prípade otázok nás môžete kontaktovať prostredníctvom emailu "';
-const introAfterEmail =
+const defaultIntroAfterEmail =
   '" alebo vyplnením kontaktného formuláru.';
 
 type FormErrors = Partial<
@@ -18,7 +18,15 @@ const fieldClassName =
 
 const labelClassName = "block text-sm font-normal tracking-wide text-charcoal-deep";
 
-export default function ContactForm() {
+export default function ContactForm({
+  introBeforeEmail = defaultIntroBeforeEmail,
+  introAfterEmail = defaultIntroAfterEmail,
+  email = "bytexnitra@gmail.com",
+}: {
+  introBeforeEmail?: string;
+  introAfterEmail?: string;
+  email?: string;
+}) {
   const formId = useId();
   const [errors, setErrors] = useState<FormErrors>({});
   const [status, setStatus] = useState<"idle" | "needs-backend">("idle");
@@ -72,10 +80,10 @@ export default function ContactForm() {
       <p className="text-sm font-light leading-relaxed text-charcoal/75 sm:leading-[1.7]">
         {introBeforeEmail}
         <a
-          href="mailto:bytexnitra@gmail.com"
+          href={`mailto:${email}`}
           className="text-gold transition-colors duration-300 hover:text-gold-dark"
         >
-          bytexnitra@gmail.com
+          {email}
         </a>
         {introAfterEmail}
       </p>
@@ -236,10 +244,10 @@ export default function ContactForm() {
           >
             Formulár je pripravený, no odosielanie ešte nie je napojené. Prosím napíšte nám na{" "}
             <a
-              href="mailto:bytexnitra@gmail.com"
+              href={`mailto:${email}`}
               className="text-gold transition-colors hover:text-gold-dark"
             >
-              bytexnitra@gmail.com
+              {email}
             </a>
             .
           </p>

@@ -2,10 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const missionText =
-  "Sme správcovská spoločnosť zameraná na správu bytových domov v Nitre. Bezprostredným podnetom k vzniku spoločnosti boli impulzy a myšlienky individuálneho prístupu k bytovým domom, pričom hlavným cieľom našich činností je komplexný komfort pre každého koncového užívateľa.";
+const defaults = {
+  eyebrow: "O nás",
+  heading: "Poslanie spoločnosti",
+  body: "Sme správcovská spoločnosť zameraná na správu bytových domov v Nitre. Bezprostredným podnetom k vzniku spoločnosti boli impulzy a myšlienky individuálneho prístupu k bytovým domom, pričom hlavným cieľom našich činností je komplexný komfort pre každého koncového užívateľa.",
+};
 
-export default function About() {
+export default function About({
+  eyebrow = defaults.eyebrow,
+  heading = defaults.heading,
+  body = defaults.body,
+}: {
+  eyebrow?: string;
+  heading?: string;
+  body?: string;
+}) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -49,7 +60,7 @@ export default function About() {
             show ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
           }`}
         >
-          O nás
+          {eyebrow}
         </p>
         <h2 className="font-serif overflow-hidden text-4xl font-light leading-tight tracking-tight text-charcoal-deep sm:text-5xl lg:text-6xl">
           <span
@@ -61,7 +72,7 @@ export default function About() {
               transitionDuration: "780ms",
             }}
           >
-            Poslanie spoločnosti
+            {heading}
           </span>
         </h2>
         <p
@@ -70,7 +81,7 @@ export default function About() {
           }`}
           style={{ transitionDelay: show && !reduceMotion ? "260ms" : "0ms" }}
         >
-          {missionText}
+          {body}
         </p>
       </div>
     </section>

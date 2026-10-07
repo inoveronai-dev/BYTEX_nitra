@@ -14,46 +14,6 @@ type Project = {
   facts: string[];
 };
 
-const projects: Project[] = [
-  {
-    id: "hlohovecka",
-    title: "Hlohovecká 1, Lužianky",
-    beforeImage: "/reconstructions/hlohovecka-pred.jpeg",
-    afterImage: "/reconstructions/hlohovecka-po.jpeg",
-    beforeText:
-      "Bytový dom pred komplexnou rekonštrukciou 2025. Zhotoviteľ: fasáda a pivnice BYTEX Nitra,s.r.o., strecha DEPEX,s.r.o., okná a dvere TERMOWIN,s.r.o., bleskozvod projekt REXEL,s.r.o., a realizácia Branislav Borza, vodovodná prípojka Ing. Jozef Vyskoč EKOSTAVING.",
-    afterText:
-      "Bytový dom po rekonštrukcii 2025. Zateplenie a výmena krytiny strechy, projektovanie a výmena bleskozvodu, renovácia fasády, zateplenie pivníc, vymaľovanie spoločných priestorov, výmena vchodových dverí a pivničných okien a nakoniec nová vodovodná prípojka. Celková investícia 50 000€.",
-    facts: ["2025", "Celková investícia 50 000 €"],
-  },
-  {
-    id: "za-humnami",
-    title: "Za Humnami 2, Veľký Cetín",
-    beforeImage: "/reconstructions/za-humnami-pred.jpeg",
-    afterImage: "/reconstructions/za-humnami-po.jpeg",
-    beforeText:
-      "Bytový dom pred komplexnou rekonštrukciou 2025. Zhotoviteľ: zateplenie fasády, omietky schodisko BYTEX Nitra SERVIS,s.r.o., pivničné okná Vladimír Čaplák, bleskozvod projekt REXEL,s.r.o. a realizácia Branislav Borza.",
-    afterText:
-      "Bytový dom po rekonštrukcii 2025. Zateplenie fasády, rekonštrukcia interiéru schodiska, projektovanie a výmena bleskozvodu a elektroinštalácie, výmena pivničných okien. Celková investícia 50 000€.",
-    facts: ["2025", "Celková investícia 50 000 €"],
-  },
-  {
-    id: "mikoviniho",
-    title: "Mikovíniho 18 a 20, Nitra",
-    beforeImage: "/reconstructions/mikoviniho-pred.jpeg",
-    afterImage: "/reconstructions/mikoviniho-po.jpeg",
-    beforeText:
-      "Bytový dom pred komplexnou rekonštrukciou 2025. Zhotoviteľ: Umytie a premaľovanie fasády, nové závesné balkóny so striežkami SanaTOP,s.r.o., rekonštrukcia elektroištalácie stupačky EkoReko,s.r.o. Projekt realizovaný cez ŠFRB.",
-    afterText:
-      "Bytový dom v procese rekonštrukcie. Termín ukončenia prác september 2025. Umytie a premaľovanie fasády, nové závesné hliníkové balkóny so striežkami a bočnicami, vý́mena napájacích rozvodov v stupačkách, vý́mena napájacích káblov do bytov, doplnenie núdzových svietidiel na schodiskách, doplnenie hlavného ističa v stupačkách a uzemnenie bytového domu. Celková investícia 295 000 €.",
-    facts: [
-      "V procese rekonštrukcie",
-      "Termín ukončenia prác september 2025",
-      "Celková investícia 295 000 €",
-    ],
-  },
-];
-
 function isInvestmentFact(fact: string) {
   return /investícia|€/i.test(fact);
 }
@@ -174,7 +134,7 @@ function ProjectShowcase({ project }: { project: Project }) {
   );
 }
 
-export default function Reconstructions() {
+export default function Reconstructions({ projects = [] }: { projects?: Project[] }) {
   return (
     <section
       id="rekonstrukcie"

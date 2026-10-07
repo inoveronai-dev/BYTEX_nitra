@@ -2,78 +2,14 @@
 
 import { useCallback, useEffect, useId, useState } from "react";
 
-const introText =
-  "V bytových domoch sa nachádzajú aj spoločné zariadenia (§ 2 ods. 5 zákona č. 182/1993 Z. z.), ktoré si z hľadiska bezpečnosti, prevádzkyschopnosti alebo spoľahlivosti vyžadujú vykonávanie pravidelných odborných prehliadok, revízií, skúšok a overovaní:";
-
-const revisions = [
-  {
-    id: "elektroinstalacia",
-    title: "Rozvody elektroinštalácie",
-    interval: "5 rokov",
-    detail:
-      "Vykonávajú sa každých 5 rokov, v mokrom prostredí (napr. práčovne) každý rok.",
-  },
-  {
-    id: "bleskozvody",
-    title: "Sústava bleskozvodov",
-    interval: "4 roky / 2 roky",
-    detail:
-      "Vykonávajú sa každé 4 roky, prípadne každé 2 roky, podľa úrovni ochrany.",
-  },
-  {
-    id: "plyn",
-    title: "Plynové rozvody",
-    interval: "1 rok / 3 roky",
-    detail:
-      "Každý rok sa musí uskutočniť kontrola hlavného prívodu plynu až po stúpací rozvod, každé 3 roky sa musí uskutočniť odborná prehliadka plynových rozvodov, pri ktorej sa kontroluje a meria prípadný únik plynu.",
-  },
-  {
-    id: "hydranty",
-    title: "Hydranty a hasiace prístroje",
-    interval: "1 rok",
-    detail:
-      "Kontrola funkčnosti hasiacich prístrojov a hydrantov, úplnosť ich vybavenia a tlaková skúška hydrantov sa vykonáva každý rok.",
-  },
-  {
-    id: "poziarna",
-    title: "Požiarna ochrana",
-    interval: "1 rok",
-    detail:
-      "Vykonáva sa každý rok. Súčasťou takejto prehliadky je kontrola únikových ciest a východov, ktoré sa musia označovať a udržiavať trvalo voľné, ako aj prístup k uzáverom rozvodných zariadení elektrickej energie, plynu, vody, k požiarnotechnickým zariadeniam a požiarnym vodovodom.",
-  },
-  {
-    id: "kominy",
-    title: "Komíny",
-    interval: "1 rok / 2× ročne",
-    detail:
-      "Kontrola ich stavu, spôsobilosti a ich čistenie sa vykonáva taktiež každý rok, v niektorých prípadoch aj 2x ročne.",
-  },
-  {
-    id: "vytahy",
-    title: "Výťahy",
-    interval: "3 mesiace / 3 roky / 6 rokov",
-    detail:
-      "Odborné prehliadky každé 3 mesiace, opakované odborné záťažové skúšky každé 3 roky, opakované úradné skúšky každých 6 rokov.",
-  },
-  {
-    id: "vodomer-studena",
-    title: "Vodomer studená voda",
-    interval: "5 rokov",
-    detail:
-      "Pri vodomeroch na studenú vodu príslušná právna úprava (zákon č. 142/2000 Z. z. o metrológii ukladá povinnosť vykonávať opakované overovania a repasáciu meradiel každých 5 rokov.",
-  },
-  {
-    id: "vodomer-tepla",
-    title: "Vodomer teplá voda",
-    interval: "5 rokov",
-    detail:
-      "Na vodomery na teplú vodu sa vzťahujú ustanovenia jednak zákona o tepelnej energetike č. 657/2004 Z. z. tak aj zákona o metrológii, ktoré ukladajú povinnosť vykonávať opakované overovania a repasáciu meradiel každých 5 rokov.",
-  },
-];
+type RevisionItem = {
+  id: number | string;
+  title: string;
+  frequency: string;
+  body: string;
+};
 
 const PREVIEW_COUNT = 3;
-const visibleByDefault = revisions.slice(0, PREVIEW_COUNT);
-const hiddenByDefault = revisions.slice(PREVIEW_COUNT);
 
 function FrequencyLabel({
   interval,
@@ -121,7 +57,7 @@ function RevisionRow({
   toggleItem,
   dimmed,
 }: {
-  item: (typeof revisions)[number];
+  item: RevisionItem;
   baseId: string;
   isActive: boolean;
   hoverCapable: boolean;
@@ -130,8 +66,9 @@ function RevisionRow({
   toggleItem: (id: string) => void;
   dimmed: boolean;
 }) {
-  const panelId = `${baseId}-${item.id}-panel`;
-  const buttonId = `${baseId}-${item.id}-button`;
+  const id = String(item.id);
+  const panelId = `${baseId}-${id}-panel`;
+  const buttonId = `${baseId}-${id}-button`;
 
   return (
     <li
@@ -139,11 +76,11 @@ function RevisionRow({
         dimmed ? "opacity-55" : "opacity-100"
       } ${isActive ? "bg-black/[0.02]" : "bg-transparent hover:bg-black/[0.015]"}`}
       onMouseEnter={() => {
-        if (hoverCapable) openItem(item.id);
+        if (hoverCapable) openItem(id);
       }}
     >
       <div className="flex h-auto w-full items-start gap-3 py-1.5 sm:gap-5 sm:py-2 md:gap-7">
-        <FrequencyLabel interval={item.interval} isActive={isActive} />
+        <FrequencyLabel interval={item.frequency} isActive={isActive} />
 
         <div className="min-h-0 min-w-0 flex-1 self-start">
           <button
@@ -153,9 +90,9 @@ function RevisionRow({
             aria-controls={panelId}
             className="flex w-full cursor-pointer items-center gap-3 py-0 text-left sm:gap-4"
             onClick={() => {
-              if (!hoverCapable) toggleItem(item.id);
+              if (!hoverCapable) toggleItem(id);
             }}
-            onFocus={() => openItem(item.id)}
+            onFocus={() => openItem(id)}
             onKeyDown={(event) => {
               if (event.key === "Escape") closeItem();
             }}
@@ -199,7 +136,7 @@ function RevisionRow({
           >
             <div className="min-h-0 overflow-hidden">
               <p className="max-w-xl pb-2 pt-1 text-xs font-light leading-snug text-charcoal/70 sm:max-w-2xl sm:pb-2.5 sm:text-[0.8125rem] sm:leading-[1.55]">
-                {item.detail}
+                {item.body}
               </p>
             </div>
           </div>
@@ -209,12 +146,21 @@ function RevisionRow({
   );
 }
 
-export default function Revisions() {
+export default function Revisions({
+  intro = "",
+  items = [],
+}: {
+  intro?: string;
+  items?: RevisionItem[];
+}) {
   const baseId = useId();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hoverCapable, setHoverCapable] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+
+  const visibleByDefault = items.slice(0, PREVIEW_COUNT);
+  const hiddenByDefault = items.slice(PREVIEW_COUNT);
 
   useEffect(() => {
     const hoverMedia = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -248,12 +194,12 @@ export default function Revisions() {
       const next = !current;
       if (!next) {
         setActiveId((active) =>
-          active && hiddenByDefault.some((item) => item.id === active) ? null : active
+          active && hiddenByDefault.some((item) => String(item.id) === active) ? null : active
         );
       }
       return next;
     });
-  }, []);
+  }, [hiddenByDefault]);
 
   return (
     <section id="revizie" className="section-cream scroll-mt-24 py-16 sm:py-20 lg:py-24">
@@ -263,7 +209,7 @@ export default function Revisions() {
           <span className="text-gold-eyebrow">a revízie</span>
         </h2>
         <p className="mt-5 max-w-3xl text-sm font-light leading-relaxed text-charcoal/75 sm:text-base sm:leading-[1.75]">
-          {introText}
+          {intro}
         </p>
 
         <ul
@@ -277,12 +223,12 @@ export default function Revisions() {
               key={item.id}
               item={item}
               baseId={baseId}
-              isActive={activeId === item.id}
+              isActive={activeId === String(item.id)}
               hoverCapable={hoverCapable}
               openItem={openItem}
               closeItem={closeItem}
               toggleItem={toggleItem}
-              dimmed={Boolean(activeId && activeId !== item.id)}
+              dimmed={Boolean(activeId && activeId !== String(item.id))}
             />
           ))}
 
@@ -301,12 +247,12 @@ export default function Revisions() {
                       key={item.id}
                       item={item}
                       baseId={baseId}
-                      isActive={activeId === item.id}
+                      isActive={activeId === String(item.id)}
                       hoverCapable={hoverCapable}
                       openItem={openItem}
                       closeItem={closeItem}
                       toggleItem={toggleItem}
-                      dimmed={Boolean(activeId && activeId !== item.id)}
+                      dimmed={Boolean(activeId && activeId !== String(item.id))}
                     />
                   ))}
                 </ul>
@@ -315,24 +261,26 @@ export default function Revisions() {
           </li>
         </ul>
 
-        <div className="mt-5">
-          <button
-            type="button"
-            onClick={toggleShowAll}
-            aria-expanded={showAll}
-            className="group inline-flex items-center gap-1.5 text-sm font-light tracking-wide text-gold transition-colors duration-300 hover:text-gold-dark"
-          >
-            {showAll ? "Skryť revízie" : "Zobraziť všetky revízie"}
-            <span
-              className={`inline-block transition-transform duration-300 ${
-                showAll ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"
-              }`}
-              aria-hidden
+        {hiddenByDefault.length > 0 ? (
+          <div className="mt-5">
+            <button
+              type="button"
+              onClick={toggleShowAll}
+              aria-expanded={showAll}
+              className="group inline-flex items-center gap-1.5 text-sm font-light tracking-wide text-gold transition-colors duration-300 hover:text-gold-dark"
             >
-              {showAll ? "↑" : "↓"}
-            </span>
-          </button>
-        </div>
+              {showAll ? "Skryť revízie" : "Zobraziť všetky revízie"}
+              <span
+                className={`inline-block transition-transform duration-300 ${
+                  showAll ? "group-hover:-translate-y-0.5" : "group-hover:translate-y-0.5"
+                }`}
+                aria-hidden
+              >
+                {showAll ? "↑" : "↓"}
+              </span>
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );

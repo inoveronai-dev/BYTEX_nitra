@@ -1,5 +1,5 @@
 import Reveal from "@/components/Reveal";
-import { pricingSections, type PricingItem } from "@/lib/pricing";
+import type { PricingItem, PricingSection } from "@/lib/pricing";
 
 function PriceBlock({ item }: { item: PricingItem }) {
   return (
@@ -30,10 +30,14 @@ function PriceBlock({ item }: { item: PricingItem }) {
   );
 }
 
-export default function PricingRegister() {
+export default function PricingRegister({
+  sections = [],
+}: {
+  sections?: PricingSection[];
+}) {
   return (
     <div className="mt-12 space-y-14 sm:mt-16 sm:space-y-16">
-      {pricingSections.map((section, sectionIndex) => (
+      {sections.map((section, sectionIndex) => (
         <section key={section.id} aria-labelledby={`pricing-${section.id}`}>
           <Reveal delayMs={sectionIndex * 60}>
             <div className="border-b border-gold/25 pb-4">
