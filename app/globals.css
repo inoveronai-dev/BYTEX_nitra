@@ -26,6 +26,16 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Pre-React cover for first homepage visit — prevents homepage flash before splash mounts */
+html[data-bytex-splash="pending"]::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  background: #f9f9f6;
+  pointer-events: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
