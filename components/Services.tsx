@@ -59,10 +59,10 @@ export default function Services() {
     <section id="sluzby" className="scroll-mt-24 bg-[#111111] py-24 text-cream sm:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <Reveal>
-          <p className="text-xs font-light uppercase tracking-[0.3em] text-gold-light">
+          <p className="section-eyebrow section-eyebrow--on-dark">
             Správa bytových domov
           </p>
-          <h2 className="font-serif mt-8 text-3xl font-light tracking-tight text-cream sm:text-4xl lg:text-5xl">
+          <h2 className="font-serif text-3xl font-light tracking-tight text-cream sm:text-4xl lg:text-5xl">
             Komplexné služby správy
           </h2>
         </Reveal>
