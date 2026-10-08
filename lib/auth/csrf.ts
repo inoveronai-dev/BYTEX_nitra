@@ -22,21 +22,52 @@ export function verifyCsrfToken(token: string | null | undefined) {
   }
 }
 
+function allowedOrigins(): Set<string> {
+  const allowed = new Set<string>();
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl) {
+    try {
+      allowed.add(new URL(appUrl).origin);
+    } catch {
+      // ignore
+    }
+  }
+  // Vercel preview / deployment host
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    const host = vercelUrl.startsWith("http") ? vercelUrl : `https://${vercelUrl}`;
+    try {
+      allowed.add(new URL(host).origin);
+    } catch {
+      // ignore
+    }
+  }
+  const vercelBranch = process.env.VERCEL_BRANCH_URL?.trim();
+  if (vercelBranch) {
+    const host = vercelBranch.startsWith("http") ? vercelBranch : `https://${vercelBranch}`;
+    try {
+      allowed.add(new URL(host).origin);
+    } catch {
+      // ignore
+    }
+  }
+  return allowed;
+}
+
 export function assertSameOrigin(request: Request) {
-  const appUrl = process.env.APP_URL;
-  if (!appUrl) {
+  const allowed = allowedOrigins();
+  if (!allowed.size) {
     if (process.env.NODE_ENV === "production") return false;
     return true;
   }
 
   const origin = request.headers.get("origin");
   const referer = request.headers.get("referer");
-  const allowed = new URL(appUrl).origin;
 
-  if (origin) return origin === allowed;
+  if (origin) return allowed.has(origin);
   if (referer) {
     try {
-      return new URL(referer).origin === allowed;
+      return allowed.has(new URL(referer).origin);
     } catch {
       return false;
     }
