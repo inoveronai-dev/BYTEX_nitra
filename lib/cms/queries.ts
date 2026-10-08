@@ -1,88 +1,141 @@
 /**
- * Public content adapter.
- * - static (Vercel): reads committed snapshot — never touches SQLite
- * - sqlite (local): delegates to queries-sqlite via lazy require
+ * Public content reader — loads committed content/*.json at build/render time.
+ * Visitors never call GitHub; admin APIs talk to GitHub separately.
  */
-import { publicSiteContent } from "@/lib/content/public-content";
-import { isStaticPublicContent } from "@/lib/content/storage-mode";
+import aboutJson from "@/content/about.json";
+import benefitsJson from "@/content/benefits.json";
+import contactJson from "@/content/contact.json";
+import documentsJson from "@/content/documents.json";
+import heroJson from "@/content/hero.json";
+import importantContactsJson from "@/content/important-contacts.json";
+import partnersJson from "@/content/partners.json";
+import pricingJson from "@/content/pricing.json";
+import privacyJson from "@/content/privacy.json";
+import reconstructionsJson from "@/content/reconstructions.json";
+import referencesJson from "@/content/references.json";
+import revisionsJson from "@/content/revisions.json";
+import servicesJson from "@/content/services.json";
+import { mediaSrc } from "@/lib/cms/media";
 
-type SqliteQueries = typeof import("./queries-sqlite");
+function activeSorted<T extends { isActive?: boolean; sortOrder?: number }>(items: T[]) {
+  return [...items]
+    .filter((i) => i.isActive !== false)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+}
 
-function sqlite(): SqliteQueries {
-  if (isStaticPublicContent()) {
-    throw new Error("SQLite CMS is disabled in static public content mode.");
+function parseContactsJson(raw: string) {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    return [];
   }
-  // Lazy require so better-sqlite3 is never loaded on Vercel public paths.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require("./queries-sqlite") as SqliteQueries;
 }
 
 export function getHero() {
-  if (isStaticPublicContent()) return publicSiteContent.hero;
-  return sqlite().getHero();
+  return {
+    headlineLines: heroJson.headlineLines,
+    imageSrc: mediaSrc(heroJson.imageSrc),
+  };
 }
 
 export function getAbout() {
-  if (isStaticPublicContent()) return publicSiteContent.about;
-  return sqlite().getAbout();
+  return aboutJson;
 }
 
 export function getBenefits() {
-  if (isStaticPublicContent()) return publicSiteContent.benefits;
-  return sqlite().getBenefits();
+  return activeSorted(benefitsJson);
 }
 
 export function getServices() {
-  if (isStaticPublicContent()) return publicSiteContent.services;
-  return sqlite().getServices();
+  return activeSorted(servicesJson).map((s) => ({
+    ...s,
+    image: mediaSrc(s.imagePath),
+  }));
 }
 
 export function getRevisions() {
-  if (isStaticPublicContent()) return publicSiteContent.revisions;
-  return sqlite().getRevisions();
+  return {
+    intro: revisionsJson.intro,
+    items: activeSorted(revisionsJson.items),
+  };
 }
 
 export function getReferences() {
-  if (isStaticPublicContent()) return publicSiteContent.references;
-  return sqlite().getReferences();
+  return activeSorted(referencesJson).map((r) => ({
+    name: r.name,
+    image: mediaSrc(r.imagePath),
+  }));
 }
 
 export function getReconstructions() {
-  if (isStaticPublicContent()) return publicSiteContent.reconstructions;
-  return sqlite().getReconstructions();
+  return activeSorted(reconstructionsJson).map((p) => ({
+    id: p.slug,
+    title: p.title,
+    beforeImage: mediaSrc(p.beforeImagePath),
+    afterImage: mediaSrc(p.afterImagePath),
+    beforeText: p.beforeText,
+    afterText: p.afterText,
+    facts: p.facts ?? [],
+    yearStatus: p.yearStatus,
+    investment: p.investment,
+  }));
 }
 
 export function getPartners() {
-  if (isStaticPublicContent()) return publicSiteContent.partners;
-  return sqlite().getPartners();
+  return activeSorted(partnersJson).map((p) => ({
+    name: p.name,
+    src: mediaSrc(p.logoPath),
+    url: p.url,
+    alt: p.name,
+  }));
 }
 
 export function getDownloads() {
-  if (isStaticPublicContent()) return publicSiteContent.downloads;
-  return sqlite().getDownloads();
+  return {
+    intro: documentsJson.intro,
+    documents: activeSorted(documentsJson.items).map((d) => ({
+      title: d.title,
+      href: d.filePath ? mediaSrc(d.filePath) : d.externalUrl || "#",
+    })),
+  };
 }
 
 export function getPricing() {
-  if (isStaticPublicContent()) return publicSiteContent.pricing;
-  return sqlite().getPricing();
+  return {
+    note: pricingJson.note,
+    sections: pricingJson.sections,
+  };
 }
 
 export function getImportantContacts() {
-  if (isStaticPublicContent()) return publicSiteContent.importantContacts;
-  return sqlite().getImportantContacts();
+  return activeSorted(importantContactsJson).map((r) => ({
+    ...r,
+    logoSrc: r.logoPath ? mediaSrc(r.logoPath) : null,
+    contacts: parseContactsJson(r.contactsJson),
+  }));
 }
 
 export function getContactPage() {
-  if (isStaticPublicContent()) return publicSiteContent.contactPage;
-  return sqlite().getContactPage();
+  return {
+    contact: contactJson.contact,
+    hours: [...contactJson.hours].sort((a, b) => a.sortOrder - b.sortOrder),
+    settings: contactJson.settings,
+  };
 }
 
 export function getChangeManager() {
-  if (isStaticPublicContent()) return publicSiteContent.changeManager;
-  return sqlite().getChangeManager();
+  const cm = heroJson.changeManager;
+  if (!cm) return null;
+  return {
+    intro: cm.intro,
+    quotes: cm.quotes,
+    downloadHref: cm.downloadPath
+      ? mediaSrc(cm.downloadPath)
+      : cm.downloadUrl || "#",
+    backgroundImage: mediaSrc(cm.backgroundImagePath || "/change-manager-bg.jpg"),
+  };
 }
 
 export function getPrivacySections() {
-  if (isStaticPublicContent()) return publicSiteContent.privacy;
-  return sqlite().getPrivacySections();
+  return activeSorted(privacyJson);
 }

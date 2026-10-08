@@ -1,18 +1,54 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { getDb } from "@/lib/db/client";
-import { contactInfo, officeHours, siteSettings } from "@/lib/db/schema";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import { loadContent, saveContent, SAVE_FLASH } from "@/lib/cms/admin-store";
+
+type ContactContent = {
+  contact: {
+    person: string;
+    email: string;
+    phone: string;
+    phoneHref: string;
+    addressLine1: string;
+    addressLine2: string;
+    facebookUrl: string;
+    instagramUrl: string;
+    mapEmbedUrl: string;
+    clientCentreIntro: string;
+    formIntroBeforeEmail: string;
+    formIntroAfterEmail: string;
+  };
+  hours: Array<{
+    day: string;
+    timeText: string;
+    isOpen: boolean;
+    sortOrder: number;
+  }>;
+  settings: {
+    companyName: string;
+    ico: string;
+    dic: string;
+    copyrightText: string;
+  };
+};
 
 export async function GET(request: Request) {
   const gate = await requireAdminApi(request);
   if ("error" in gate && gate.error) return gate.error;
-  const db = getDb();
-  return jsonOk({
-    contact: db.select().from(contactInfo).get() || null,
-    hours: db.select().from(officeHours).orderBy(asc(officeHours.sortOrder)).all(),
-    settings: db.select().from(siteSettings).get() || null,
-  });
+  try {
+    const { data } = await loadContent<ContactContent>("contact");
+    return jsonOk({
+      contact: data.contact,
+      hours: [...data.hours].sort((a, b) => a.sortOrder - b.sortOrder),
+      settings: data.settings,
+    });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 const schema = z.object({
@@ -52,39 +88,21 @@ export async function PUT(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
 
-  const contact = db.select().from(contactInfo).get();
-  if (contact) {
-    db.update(contactInfo)
-      .set({ ...parsed.data.contact, updatedAt: new Date().toISOString() })
-      .where(eq(contactInfo.id, contact.id))
-      .run();
-  } else {
-    db.insert(contactInfo).values(parsed.data.contact).run();
+  try {
+    const next: ContactContent = {
+      contact: parsed.data.contact,
+      hours: parsed.data.hours.map(({ day, timeText, isOpen, sortOrder }) => ({
+        day,
+        timeText,
+        isOpen,
+        sortOrder,
+      })),
+      settings: parsed.data.settings,
+    };
+    const saved = await saveContent("contact", next, "cms: update contact");
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
   }
-
-  db.delete(officeHours).run();
-  for (const h of parsed.data.hours) {
-    db.insert(officeHours)
-      .values({
-        day: h.day,
-        timeText: h.timeText,
-        isOpen: h.isOpen,
-        sortOrder: h.sortOrder,
-      })
-      .run();
-  }
-
-  const settings = db.select().from(siteSettings).get();
-  if (settings) {
-    db.update(siteSettings)
-      .set({ ...parsed.data.settings, updatedAt: new Date().toISOString() })
-      .where(eq(siteSettings.id, settings.id))
-      .run();
-  } else {
-    db.insert(siteSettings).values(parsed.data.settings).run();
-  }
-
-  return jsonOk({ ok: true });
 }

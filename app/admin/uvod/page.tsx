@@ -129,7 +129,10 @@ export default function AdminHeroPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Uloženie zlyhalo.");
-      setFlash({ type: "success", message: "Zmeny boli uložené." });
+      setFlash({
+        type: "success",
+        message: data.message || "Zmeny boli uložené. Web sa aktualizuje.",
+      });
     } catch (e) {
       setFlash({ type: "error", message: e instanceof Error ? e.message : "Uloženie zlyhalo." });
     } finally {

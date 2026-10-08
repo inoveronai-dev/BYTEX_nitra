@@ -1,64 +1,53 @@
-import { eq } from "drizzle-orm";
-import { getDb } from "@/lib/db/client";
-import { loginAttempts } from "@/lib/db/schema";
-import { runMigrations } from "@/lib/db/migrate";
+/** In-memory login rate limit (per server instance). */
 
-const MAX_FAILURES = 5;
+type Attempt = { count: number; firstAt: number; lockedUntil?: number };
+
+const attempts = new Map<string, Attempt>();
+
 const WINDOW_MS = 15 * 60 * 1000;
+const MAX_FAILURES = 8;
+const LOCK_MS = 15 * 60 * 1000;
+
+function prune(key: string, now: number) {
+  const row = attempts.get(key);
+  if (!row) return;
+  if (row.lockedUntil && row.lockedUntil < now) {
+    attempts.delete(key);
+    return;
+  }
+  if (!row.lockedUntil && now - row.firstAt > WINDOW_MS) {
+    attempts.delete(key);
+  }
+}
 
 export function checkLoginAllowed(key: string): { ok: true } | { ok: false; message: string } {
-  runMigrations();
-  const db = getDb();
-  const row = db.select().from(loginAttempts).where(eq(loginAttempts.key, key)).get();
-  if (!row?.windowUntil) return { ok: true };
-
-  const until = new Date(row.windowUntil).getTime();
-  if (until > Date.now() && row.failedCount >= MAX_FAILURES) {
+  const now = Date.now();
+  prune(key, now);
+  const row = attempts.get(key);
+  if (row?.lockedUntil && row.lockedUntil > now) {
+    const mins = Math.ceil((row.lockedUntil - now) / 60000);
     return {
       ok: false,
-      message: "Príliš veľa neúspešných pokusov. Skúste to znova o 15 minút.",
+      message: `Príliš veľa neúspešných pokusov. Skúste znova o ${mins} min.`,
     };
-  }
-  if (until <= Date.now()) {
-    db.delete(loginAttempts).where(eq(loginAttempts.key, key)).run();
   }
   return { ok: true };
 }
 
 export function recordLoginFailure(key: string) {
-  runMigrations();
-  const db = getDb();
-  const row = db.select().from(loginAttempts).where(eq(loginAttempts.key, key)).get();
   const now = Date.now();
-  const windowUntil = new Date(now + WINDOW_MS).toISOString();
-
+  prune(key, now);
+  const row = attempts.get(key);
   if (!row) {
-    db.insert(loginAttempts)
-      .values({
-        key,
-        failedCount: 1,
-        windowUntil,
-        updatedAt: new Date().toISOString(),
-      })
-      .run();
+    attempts.set(key, { count: 1, firstAt: now });
     return;
   }
-
-  const previousUntil = row.windowUntil ? new Date(row.windowUntil).getTime() : 0;
-  const count = previousUntil > now ? row.failedCount + 1 : 1;
-
-  db.update(loginAttempts)
-    .set({
-      failedCount: count,
-      windowUntil,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(loginAttempts.key, key))
-    .run();
+  row.count += 1;
+  if (row.count >= MAX_FAILURES) {
+    row.lockedUntil = now + LOCK_MS;
+  }
 }
 
 export function clearLoginFailures(key: string) {
-  runMigrations();
-  const db = getDb();
-  db.delete(loginAttempts).where(eq(loginAttempts.key, key)).run();
+  attempts.delete(key);
 }

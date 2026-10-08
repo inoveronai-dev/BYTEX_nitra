@@ -1,13 +1,13 @@
-import { createHash, randomBytes } from "node:crypto";
-import { eq, lt } from "drizzle-orm";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
-import { isStaticPublicContent } from "@/lib/content/storage-mode";
-import { getDb } from "@/lib/db/client";
-import { admins, sessions } from "@/lib/db/schema";
-import { runMigrations } from "@/lib/db/migrate";
 
 export const SESSION_COOKIE = "bytex_session";
 const SESSION_DAYS = 7;
+
+type SessionPayload = {
+  email: string;
+  exp: number;
+};
 
 function getSessionSecret() {
   const secret = process.env.SESSION_SECRET;
@@ -20,71 +20,74 @@ function getSessionSecret() {
   return secret;
 }
 
-export function hashToken(token: string) {
-  return createHash("sha256")
-    .update(`${getSessionSecret()}:${token}`)
-    .digest("hex");
-}
-
 function cookieSecure() {
   if (process.env.COOKIE_SECURE === "true") return true;
   if (process.env.COOKIE_SECURE === "false") return false;
   return process.env.NODE_ENV === "production";
 }
 
-export async function createSession(adminId: number, meta?: { ip?: string; userAgent?: string }) {
-  if (isStaticPublicContent()) {
-    throw new Error("Admin sessions are disabled in static public content mode.");
+function b64url(input: string | Buffer) {
+  return Buffer.from(input)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function fromB64url(input: string) {
+  const padded = input.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((input.length + 3) % 4);
+  return Buffer.from(padded, "base64").toString("utf8");
+}
+
+function sign(payloadB64: string) {
+  return createHmac("sha256", getSessionSecret()).update(payloadB64).digest("base64url");
+}
+
+function encodeSession(payload: SessionPayload) {
+  const payloadB64 = b64url(JSON.stringify(payload));
+  return `${payloadB64}.${sign(payloadB64)}`;
+}
+
+function decodeSession(raw: string): SessionPayload | null {
+  const [payloadB64, sig] = raw.split(".");
+  if (!payloadB64 || !sig) return null;
+  const expected = sign(payloadB64);
+  const a = Buffer.from(sig);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  try {
+    const payload = JSON.parse(fromB64url(payloadB64)) as SessionPayload;
+    if (!payload.email || typeof payload.exp !== "number") return null;
+    if (payload.exp < Date.now()) return null;
+    return payload;
+  } catch {
+    return null;
   }
-  runMigrations();
-  const db = getDb();
-  const token = randomBytes(32).toString("hex");
-  const id = randomBytes(16).toString("hex");
+}
+
+export function getAdminCredentials() {
+  const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
+  if (!email || !passwordHash) return null;
+  return { email, passwordHash };
+}
+
+export async function createSession(email: string) {
   const expires = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-
-  await db.insert(sessions).values({
-    id,
-    adminId,
-    tokenHash: hashToken(token),
-    expiresAt: expires.toISOString(),
-    ip: meta?.ip ?? null,
-    userAgent: meta?.userAgent ?? null,
-  });
-
+  const token = encodeSession({ email: email.toLowerCase(), exp: expires.getTime() });
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, `${id}.${token}`, {
+  cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: cookieSecure(),
     path: "/",
     expires,
   });
-
-  return { id, expires };
+  return { expires };
 }
 
 export async function destroySession() {
-  if (isStaticPublicContent()) {
-    const cookieStore = await cookies();
-    cookieStore.set(SESSION_COOKIE, "", {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: cookieSecure(),
-      path: "/",
-      maxAge: 0,
-    });
-    return;
-  }
-  runMigrations();
   const cookieStore = await cookies();
-  const raw = cookieStore.get(SESSION_COOKIE)?.value;
-  if (raw) {
-    const [id] = raw.split(".");
-    if (id) {
-      const db = getDb();
-      await db.delete(sessions).where(eq(sessions.id, id));
-    }
-  }
   cookieStore.set(SESSION_COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",
@@ -100,44 +103,14 @@ export type AuthAdmin = {
 };
 
 export async function getCurrentAdmin(): Promise<AuthAdmin | null> {
-  if (isStaticPublicContent()) return null;
-  runMigrations();
   const cookieStore = await cookies();
   const raw = cookieStore.get(SESSION_COOKIE)?.value;
   if (!raw) return null;
-
-  const [id, token] = raw.split(".");
-  if (!id || !token) return null;
-
-  const db = getDb();
-  const row = db
-    .select({
-      sessionId: sessions.id,
-      tokenHash: sessions.tokenHash,
-      expiresAt: sessions.expiresAt,
-      adminId: admins.id,
-      email: admins.email,
-    })
-    .from(sessions)
-    .innerJoin(admins, eq(sessions.adminId, admins.id))
-    .where(eq(sessions.id, id))
-    .get();
-
-  if (!row) return null;
-  if (new Date(row.expiresAt).getTime() < Date.now()) {
-    db.delete(sessions).where(eq(sessions.id, id)).run();
-    return null;
-  }
-  if (row.tokenHash !== hashToken(token)) return null;
-
-  // Sliding expiration (DB only — avoid setting cookies during RSC render)
-  const newExpires = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
-  db.update(sessions)
-    .set({ expiresAt: newExpires.toISOString() })
-    .where(eq(sessions.id, id))
-    .run();
-
-  return { id: row.adminId, email: row.email };
+  const payload = decodeSession(raw);
+  if (!payload) return null;
+  const creds = getAdminCredentials();
+  if (!creds || creds.email !== payload.email.toLowerCase()) return null;
+  return { id: 1, email: payload.email };
 }
 
 export async function requireAdmin() {
@@ -148,8 +121,12 @@ export async function requireAdmin() {
   return admin;
 }
 
+/** @deprecated No DB sessions in GitHub CMS mode. */
 export function purgeExpiredSessions() {
-  runMigrations();
-  const db = getDb();
-  db.delete(sessions).where(lt(sessions.expiresAt, new Date().toISOString())).run();
+  // no-op
+}
+
+/** Kept for compatibility with older imports. */
+export function hashToken(_token: string) {
+  return "";
 }

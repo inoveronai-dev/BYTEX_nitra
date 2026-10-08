@@ -34,7 +34,7 @@ yarn-error.log*
 .env*
 !.env.example
 
-# CMS persistent data (SQLite + uploads)
+# Legacy local data dir (unused in GitHub CMS)
 /data/
 
 # vercel

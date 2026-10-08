@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { adminFetch } from "@/lib/admin/api-client";
+import { optimizeImageForUpload } from "@/lib/admin/optimize-image";
 import { Button, Field } from "@/components/admin/ui";
 import { mediaSrc } from "@/lib/cms/media";
 import type { UploadKind } from "@/lib/uploads/storage";
@@ -27,8 +28,15 @@ export function ImageUploadField({
     setBusy(true);
     setError("");
     try {
+      const optimized = mode === "image" ? await optimizeImageForUpload(file) : file;
+      if (mode === "image" && optimized.size > 3 * 1024 * 1024) {
+        throw new Error("Obrázok je po kompresii stále väčší ako 3 MB. Vyberte menší súbor.");
+      }
+      if (mode === "document" && optimized.size > 4 * 1024 * 1024) {
+        throw new Error("Dokument je väčší ako 4 MB.");
+      }
       const form = new FormData();
-      form.set("file", file);
+      form.set("file", optimized);
       form.set("kind", kind);
       form.set("mode", mode);
       const res = await adminFetch("/api/admin/uploads", { method: "POST", body: form });

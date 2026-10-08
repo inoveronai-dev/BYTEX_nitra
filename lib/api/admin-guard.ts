@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { assertSameOrigin, verifyCsrfToken } from "@/lib/auth/csrf";
 import { getCurrentAdmin } from "@/lib/auth/session";
-import { runMigrations } from "@/lib/db/migrate";
+import { GithubCmsError } from "@/lib/github-cms/errors";
 
 export async function requireAdminApi(request: Request, opts?: { mutate?: boolean }) {
-  runMigrations();
   const admin = await getCurrentAdmin();
   if (!admin) {
     return { error: NextResponse.json({ error: "Neautorizovaný prístup." }, { status: 401 }) };
@@ -29,4 +28,12 @@ export function jsonOk<T>(data: T, init?: ResponseInit) {
 
 export function jsonError(message: string, status = 400) {
   return NextResponse.json({ error: message }, { status });
+}
+
+export function jsonFromUnknownError(error: unknown) {
+  if (error instanceof GithubCmsError) {
+    return jsonError(error.message, error.status);
+  }
+  const message = error instanceof Error ? error.message : "Operácia zlyhala.";
+  return jsonError(message, 500);
 }

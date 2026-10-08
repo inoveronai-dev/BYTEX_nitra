@@ -1,18 +1,28 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { getDb } from "@/lib/db/client";
-import { services } from "@/lib/db/schema";
-import { reorderByDirection } from "@/lib/cms/reorder";
-import { deleteUploadIfExists } from "@/lib/uploads/storage";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import {
+  loadContent,
+  nextId,
+  reorderItems,
+  saveContent,
+  SAVE_FLASH,
+} from "@/lib/cms/admin-store";
 
-export async function GET(request: Request) {
-  const gate = await requireAdminApi(request);
-  if ("error" in gate && gate.error) return gate.error;
-  const db = getDb();
-  const rows = db.select().from(services).orderBy(asc(services.sortOrder)).all();
-  return jsonOk({ items: rows });
-}
+type ServiceItem = {
+  id: number;
+  title: string;
+  description: string;
+  imagePath: string;
+  imageClassName: string | null;
+  imageOverlayClassName: string | null;
+  isActive: boolean;
+  sortOrder: number;
+};
 
 const upsertSchema = z.object({
   id: z.number().optional(),
@@ -24,36 +34,42 @@ const upsertSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export async function GET(request: Request) {
+  const gate = await requireAdminApi(request);
+  if ("error" in gate && gate.error) return gate.error;
+  try {
+    const { data } = await loadContent<ServiceItem[]>("services");
+    const items = [...data].sort((a, b) => a.sortOrder - b.sortOrder);
+    return jsonOk({ items });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
+}
+
 export async function POST(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
-  const body = await request.json().catch(() => null);
-  const parsed = upsertSchema.safeParse(body);
+  const parsed = upsertSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
 
-  const db = getDb();
-  const maxOrder =
-    db
-      .select()
-      .from(services)
-      .all()
-      .reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
-
-  const result = db
-    .insert(services)
-    .values({
+  try {
+    const { data } = await loadContent<ServiceItem[]>("services");
+    const sortOrder = data.reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
+    const item: ServiceItem = {
+      id: nextId(data),
       title: parsed.data.title,
       description: parsed.data.description,
       imagePath: parsed.data.imagePath,
       imageClassName: parsed.data.imageClassName ?? null,
       imageOverlayClassName: parsed.data.imageOverlayClassName ?? null,
-      sortOrder: maxOrder,
       isActive: parsed.data.isActive ?? true,
-    })
-    .returning()
-    .get();
-
-  return jsonOk({ item: result });
+      sortOrder,
+    };
+    await saveContent("services", [...data, item], "cms: create service");
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -61,52 +77,55 @@ export async function PATCH(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const body = await request.json().catch(() => null);
 
-  if (body?.action === "reorder") {
-    const id = Number(body.id);
-    const direction = body.direction === "up" ? "up" : "down";
-    reorderByDirection(services, id, direction);
-    return jsonOk({ ok: true });
-  }
+  try {
+    const { data } = await loadContent<ServiceItem[]>("services");
 
-  const parsed = upsertSchema.extend({ id: z.number() }).safeParse(body);
-  if (!parsed.success) return jsonError("Neplatné údaje.");
+    if (body?.action === "reorder") {
+      const next = reorderItems(data, Number(body.id), body.direction === "up" ? "up" : "down");
+      const saved = await saveContent("services", next, "cms: reorder services");
+      return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+    }
 
-  const db = getDb();
-  const existing = db.select().from(services).where(eq(services.id, parsed.data.id)).get();
-  if (!existing) return jsonError("Záznam neexistuje.", 404);
+    const parsed = upsertSchema.extend({ id: z.number() }).safeParse(body);
+    if (!parsed.success) return jsonError("Neplatné údaje.");
+    const existing = data.find((i) => i.id === parsed.data.id);
+    if (!existing) return jsonError("Záznam neexistuje.", 404);
 
-  if (parsed.data.imagePath !== existing.imagePath) {
-    deleteUploadIfExists(existing.imagePath);
-  }
-
-  const item = db
-    .update(services)
-    .set({
+    const item: ServiceItem = {
+      ...existing,
       title: parsed.data.title,
       description: parsed.data.description,
       imagePath: parsed.data.imagePath,
       imageClassName: parsed.data.imageClassName ?? null,
       imageOverlayClassName: parsed.data.imageOverlayClassName ?? null,
       isActive: parsed.data.isActive ?? existing.isActive,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(services.id, parsed.data.id))
-    .returning()
-    .get();
-
-  return jsonOk({ item });
+    };
+    await saveContent(
+      "services",
+      data.map((i) => (i.id === item.id ? item : i)),
+      "cms: update service"
+    );
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function DELETE(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
-  const body = await request.json().catch(() => null);
-  const id = Number(body?.id);
+  const id = Number((await request.json().catch(() => null))?.id);
   if (!id) return jsonError("Chýba ID.");
 
-  const db = getDb();
-  const existing = db.select().from(services).where(eq(services.id, id)).get();
-  if (existing) deleteUploadIfExists(existing.imagePath);
-  db.delete(services).where(eq(services.id, id)).run();
-  return jsonOk({ ok: true });
+  try {
+    const { data } = await loadContent<ServiceItem[]>("services");
+    const saved = await saveContent(
+      "services",
+      data.filter((i) => i.id !== id),
+      "cms: delete service"
+    );
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }

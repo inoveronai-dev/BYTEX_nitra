@@ -1,15 +1,26 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { reorderByDirection } from "@/lib/cms/reorder";
-import { getDb } from "@/lib/db/client";
-import { benefits } from "@/lib/db/schema";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import {
+  loadContent,
+  nextId,
+  reorderItems,
+  saveContent,
+  SAVE_FLASH,
+} from "@/lib/cms/admin-store";
 
-export async function GET(request: Request) {
-  const gate = await requireAdminApi(request);
-  if ("error" in gate && gate.error) return gate.error;
-  return jsonOk({ items: getDb().select().from(benefits).orderBy(asc(benefits.sortOrder)).all() });
-}
+type BenefitItem = {
+  id: number;
+  body: string;
+  iconKey: string;
+  emphasize: boolean;
+  isActive: boolean;
+  sortOrder: number;
+};
 
 const schema = z.object({
   id: z.number().optional(),
@@ -19,51 +30,75 @@ const schema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export async function GET(request: Request) {
+  const gate = await requireAdminApi(request);
+  if ("error" in gate && gate.error) return gate.error;
+  try {
+    const { data } = await loadContent<BenefitItem[]>("benefits");
+    const items = [...data].sort((a, b) => a.sortOrder - b.sortOrder);
+    return jsonOk({ items });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
+}
+
 export async function POST(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const sortOrder = db.select().from(benefits).all().reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
-  const item = db
-    .insert(benefits)
-    .values({
+
+  try {
+    const { data } = await loadContent<BenefitItem[]>("benefits");
+    const sortOrder = data.reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
+    const item: BenefitItem = {
+      id: nextId(data),
       body: parsed.data.body,
       iconKey: parsed.data.iconKey,
       emphasize: parsed.data.emphasize ?? false,
       isActive: parsed.data.isActive ?? true,
       sortOrder,
-    })
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    const next = [...data, item];
+    await saveContent("benefits", next, "cms: create benefit");
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function PATCH(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const body = await request.json().catch(() => null);
-  if (body?.action === "reorder") {
-    reorderByDirection(benefits, Number(body.id), body.direction === "up" ? "up" : "down");
-    return jsonOk({ ok: true });
-  }
-  const parsed = schema.extend({ id: z.number() }).safeParse(body);
-  if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const item = db
-    .update(benefits)
-    .set({
+
+  try {
+    const { data } = await loadContent<BenefitItem[]>("benefits");
+
+    if (body?.action === "reorder") {
+      const next = reorderItems(data, Number(body.id), body.direction === "up" ? "up" : "down");
+      const saved = await saveContent("benefits", next, "cms: reorder benefits");
+      return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+    }
+
+    const parsed = schema.extend({ id: z.number() }).safeParse(body);
+    if (!parsed.success) return jsonError("Neplatné údaje.");
+    const index = data.findIndex((i) => i.id === parsed.data.id);
+    if (index < 0) return jsonError("Záznam neexistuje.", 404);
+
+    const item: BenefitItem = {
+      ...data[index],
       body: parsed.data.body,
       iconKey: parsed.data.iconKey,
       emphasize: parsed.data.emphasize ?? false,
       isActive: parsed.data.isActive ?? true,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(benefits.id, parsed.data.id))
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    const next = data.map((i) => (i.id === item.id ? item : i));
+    await saveContent("benefits", next, "cms: update benefit");
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -71,6 +106,13 @@ export async function DELETE(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const id = Number((await request.json().catch(() => null))?.id);
   if (!id) return jsonError("Chýba ID.");
-  getDb().delete(benefits).where(eq(benefits.id, id)).run();
-  return jsonOk({ ok: true });
+
+  try {
+    const { data } = await loadContent<BenefitItem[]>("benefits");
+    const next = data.filter((i) => i.id !== id);
+    const saved = await saveContent("benefits", next, "cms: delete benefit");
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }

@@ -7,30 +7,21 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:migrate": "tsx -e \"require('./lib/db/migrate').runMigrations(); console.log('OK')\"",
-    "admin:create": "tsx scripts/create-admin.ts",
-    "cms:seed": "tsx scripts/seed-cms.ts",
-    "cms:backup": "bash scripts/backup.sh"
+    "admin:hash-password": "tsx scripts/hash-admin-password.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "better-sqlite3": "^13.0.3",
-    "drizzle-orm": "^0.45.3",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "uuid": "^14.0.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/bcrypt": "^6.0.0",
-    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/uuid": "^10.0.0",
-    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "tailwindcss": "^4",

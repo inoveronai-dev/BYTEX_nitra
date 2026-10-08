@@ -1,92 +1,79 @@
-# BYTEX Nitra – CMS / Admin setup
+# BYTEX Nitra – GitHub CMS / Admin setup
 
-Self-contained CMS: Next.js public site + Slovak `/admin` + SQLite + local uploads. No external CMS or auth provider.
+Production architecture: **Vercel + GitHub only**. No SQLite, Supabase, Firebase, or external storage.
+
+Flow: Admin UI → Vercel API → GitHub commit (`content/*.json` + `public/uploads/*`) → Vercel redeploy → public site.
 
 ## 1. Architecture
 
-- App: Next.js 16 (`next start` on a persistent VPS)
-- DB: SQLite via Drizzle (`better-sqlite3`)
-- Files: local directory under `UPLOAD_DIR`
-- Auth: bcrypt password hashes + server sessions (HTTP-only cookie)
+- Public site reads committed `content/*.json` and `public/uploads/`
+- Admin APIs read/write the latest files via GitHub Contents / Git Data API
+- Auth: `ADMIN_EMAIL` + bcrypt `ADMIN_PASSWORD_HASH` + signed HTTP-only cookie (`SESSION_SECRET`)
+- CSRF + same-origin checks on mutations; in-memory login rate limit
 
-## 2. SQLite location
+## 2. Environment variables
 
-Default: `./data/bytex.db`  
-Override with `DATABASE_PATH` (absolute path recommended in production).
-
-## 3. Upload location
-
-Default: `./data/uploads/` with subfolders:
-
-`services/`, `references/`, `reconstructions/`, `partners/`, `documents/`, `contacts/`, `hero/`, `general/`
-
-Public URL: `/uploads/...` (served by the app, not raw filesystem paths).
-
-## 4. Environment variables
-
-Copy `.env.example` → `.env.local` (dev) or `/etc/bytex.env` (prod):
+Copy `.env.example` → `.env.local` (local) and set the same keys in Vercel:
 
 | Variable | Purpose |
 |---|---|
-| `DATABASE_PATH` | SQLite file path |
-| `UPLOAD_DIR` | Uploads root |
+| `APP_URL` | Public origin, e.g. `https://bytexnitra.vercel.app` |
 | `SESSION_SECRET` | Long random secret (required in production) |
-| `APP_URL` | Public origin, e.g. `https://bytexnitra.sk` |
 | `COOKIE_SECURE` | `true` behind HTTPS |
-| `NODE_ENV` | `production` / `development` |
+| `ADMIN_EMAIL` | Admin login email |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash from `npm run admin:hash-password` |
+| `GITHUB_OWNER` | GitHub owner (`inoveronai-dev`) |
+| `GITHUB_REPO` | Repo name (`BYTEX_nitra`) |
+| `GITHUB_BRANCH` | Branch to commit to (`main` in prod; test branch for previews) |
+| `GITHUB_CONTENT_TOKEN` | Fine-grained PAT with Contents **Read and write** |
 
-Never commit real secrets.
+Never commit secrets. Never use `NEXT_PUBLIC_` for the token.
 
-## 5. Initial admin creation
+## 3. GitHub token
+
+1. GitHub → Settings → Developer settings → Fine-grained personal access tokens
+2. Repository access: only `BYTEX_nitra`
+3. Permissions: **Contents** → Read and write
+4. Paste token as `GITHUB_CONTENT_TOKEN` in Vercel (Production + Preview) and local `.env.local`
+
+## 4. Create admin password hash
 
 ```bash
 npm install
-npm run cms:seed          # schema + current website content
-npm run admin:create      # interactive email + password
+npm run admin:hash-password
+# paste output into ADMIN_PASSWORD_HASH
 ```
 
-## 6. Local development
+## 5. Local development
 
 ```bash
 cp .env.example .env.local
-npm install
-npm run cms:seed
-npm run admin:create
+# fill ADMIN_* and SESSION_SECRET
+# optional: fill GITHUB_* to commit against a branch; without token, saves write local content/ files
 npm run dev
 ```
 
 Admin: http://localhost:3000/admin/login
 
-## 7. Production deployment (VPS / Node)
+Without `GITHUB_CONTENT_TOKEN`, mutations write to local `content/` and `public/uploads/` (dev only).
 
-1. Node.js 20+ with build tools for native modules (`better-sqlite3`, `bcrypt`)
-2. Persistent directories for DB + uploads (not ephemeral container storage without volumes)
-3. Build: `npm ci && npm run build`
-4. Process manager: systemd or PM2 running `npm run start` (port 3000)
-5. Reverse proxy (Nginx/Caddy) with HTTPS → Node
-6. Env file with production `SESSION_SECRET`, `APP_URL`, `COOKIE_SECURE=true`, absolute `DATABASE_PATH` / `UPLOAD_DIR`
-7. Permissions: app user owns `data/` (read/write)
+## 6. Vercel deployment
 
-Do **not** rely on Vercel’s ephemeral filesystem for production CMS data.
+1. Connect the GitHub repo to Vercel
+2. Set all env vars (Production + Preview)
+3. Set `GITHUB_BRANCH=main` for production; use the preview branch name for test branches if needed
+4. Deploy — public pages need no GitHub token at runtime for reads (files are in the build)
 
-## 8. Backup
+## 7. Editorial notes
 
-```bash
-npm run cms:backup
-# or: DATABASE_PATH=... UPLOAD_DIR=... BACKUP_DIR=... bash scripts/backup.sh
-```
+- After save, flash: changes are stored; the public site updates after the Vercel build (usually 1–2 minutes)
+- Images are resized/compressed in the browser before upload (≤ ~3 MB); documents ≤ ~4 MB
+- External document CDN URLs can stay as URLs in the documents module
 
-Creates `data/backups/<timestamp>/bytex.db` + `uploads/`. Uses SQLite online `.backup` when `sqlite3` CLI is available.
+## 8. Security checklist
 
-## 9. Restore
-
-1. Stop the app
-2. Replace DB file at `DATABASE_PATH` with backup `bytex.db`
-3. Replace `UPLOAD_DIR` contents with backup `uploads/`
-4. Start the app
-5. Verify `/admin` login and a few public pages
-
-## 10. Admin login URL
-
-- Local: `/admin/login`
-- Production: `https://<your-domain>/admin/login`
+- [ ] Fine-grained PAT scoped to one repo, Contents only
+- [ ] `SESSION_SECRET` ≥ 16 random chars
+- [ ] `COOKIE_SECURE=true` in production
+- [ ] `APP_URL` matches the live origin
+- [ ] No secrets in client bundles / committed files

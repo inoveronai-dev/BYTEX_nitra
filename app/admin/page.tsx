@@ -1,25 +1,20 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { PageHeader, Card } from "@/components/admin/ui";
 import { adminNav } from "@/lib/admin/nav";
-import { isStaticPublicContent } from "@/lib/content/storage-mode";
-import { getDb } from "@/lib/db/client";
-import { runMigrations } from "@/lib/db/migrate";
-import { services, siteReferences, documents } from "@/lib/db/schema";
+import documentsJson from "@/content/documents.json";
+import referencesJson from "@/content/references.json";
+import servicesJson from "@/content/services.json";
 
-export default async function AdminDashboardPage() {
-  if (isStaticPublicContent()) notFound();
-  runMigrations();
-  const db = getDb();
-  const serviceCount = db.select().from(services).all().length;
-  const refCount = db.select().from(siteReferences).all().length;
-  const docCount = db.select().from(documents).all().length;
+export default function AdminDashboardPage() {
+  const serviceCount = servicesJson.length;
+  const refCount = referencesJson.length;
+  const docCount = documentsJson.items.length;
 
   return (
     <div>
       <PageHeader
         title="Prehľad"
-        description="Spravujte obsah webu BYTEX Nitra. Dizajn stránky sa nemení — upravujete iba texty, obrázky a dokumenty."
+        description="Spravujte obsah webu BYTEX Nitra. Uloženie vytvorí commit na GitHub a Vercel web aktualizuje (zvyčajne do 1–2 minút)."
       />
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card>

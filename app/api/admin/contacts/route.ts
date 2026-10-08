@@ -1,18 +1,31 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { reorderByDirection } from "@/lib/cms/reorder";
-import { getDb } from "@/lib/db/client";
-import { importantContacts } from "@/lib/db/schema";
-import { deleteUploadIfExists } from "@/lib/uploads/storage";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import {
+  loadContent,
+  nextId,
+  reorderItems,
+  saveContent,
+  SAVE_FLASH,
+} from "@/lib/cms/admin-store";
 
-export async function GET(request: Request) {
-  const gate = await requireAdminApi(request);
-  if ("error" in gate && gate.error) return gate.error;
-  return jsonOk({
-    items: getDb().select().from(importantContacts).orderBy(asc(importantContacts.sortOrder)).all(),
-  });
-}
+type ContactItem = {
+  id: number;
+  groupKey: "emergency" | "service_partner" | "utility";
+  name: string;
+  details: string | null;
+  logoPath: string | null;
+  imageAlt: string | null;
+  websiteLabel: string | null;
+  websiteUrl: string | null;
+  contactsJson: string;
+  isActive: boolean;
+  sortOrder: number;
+};
 
 const schema = z.object({
   id: z.number().optional(),
@@ -27,17 +40,29 @@ const schema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export async function GET(request: Request) {
+  const gate = await requireAdminApi(request);
+  if ("error" in gate && gate.error) return gate.error;
+  try {
+    const { data } = await loadContent<ContactItem[]>("importantContacts");
+    const items = [...data].sort((a, b) => a.sortOrder - b.sortOrder);
+    return jsonOk({ items });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
+}
+
 export async function POST(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const sortOrder =
-    db.select().from(importantContacts).all().reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
-  const item = db
-    .insert(importantContacts)
-    .values({
+
+  try {
+    const { data } = await loadContent<ContactItem[]>("importantContacts");
+    const sortOrder = data.reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
+    const item: ContactItem = {
+      id: nextId(data),
       groupKey: parsed.data.groupKey,
       name: parsed.data.name,
       details: parsed.data.details ?? null,
@@ -48,33 +73,35 @@ export async function POST(request: Request) {
       contactsJson: parsed.data.contactsJson,
       isActive: parsed.data.isActive ?? true,
       sortOrder,
-    })
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    await saveContent("importantContacts", [...data, item], "cms: create contact");
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function PATCH(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const body = await request.json().catch(() => null);
-  if (body?.action === "reorder") {
-    reorderByDirection(importantContacts, Number(body.id), body.direction === "up" ? "up" : "down");
-    return jsonOk({ ok: true });
-  }
-  const parsed = schema.extend({ id: z.number() }).safeParse(body);
-  if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const existing = db
-    .select()
-    .from(importantContacts)
-    .where(eq(importantContacts.id, parsed.data.id))
-    .get();
-  if (!existing) return jsonError("Záznam neexistuje.", 404);
-  if (parsed.data.logoPath !== existing.logoPath) deleteUploadIfExists(existing.logoPath);
-  const item = db
-    .update(importantContacts)
-    .set({
+
+  try {
+    const { data } = await loadContent<ContactItem[]>("importantContacts");
+
+    if (body?.action === "reorder") {
+      const next = reorderItems(data, Number(body.id), body.direction === "up" ? "up" : "down");
+      const saved = await saveContent("importantContacts", next, "cms: reorder contacts");
+      return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+    }
+
+    const parsed = schema.extend({ id: z.number() }).safeParse(body);
+    if (!parsed.success) return jsonError("Neplatné údaje.");
+    const existing = data.find((i) => i.id === parsed.data.id);
+    if (!existing) return jsonError("Záznam neexistuje.", 404);
+
+    const item: ContactItem = {
+      ...existing,
       groupKey: parsed.data.groupKey,
       name: parsed.data.name,
       details: parsed.data.details ?? null,
@@ -84,12 +111,16 @@ export async function PATCH(request: Request) {
       websiteUrl: parsed.data.websiteUrl ?? null,
       contactsJson: parsed.data.contactsJson,
       isActive: parsed.data.isActive ?? true,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(importantContacts.id, parsed.data.id))
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    await saveContent(
+      "importantContacts",
+      data.map((i) => (i.id === item.id ? item : i)),
+      "cms: update contact"
+    );
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -97,9 +128,16 @@ export async function DELETE(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const id = Number((await request.json().catch(() => null))?.id);
   if (!id) return jsonError("Chýba ID.");
-  const db = getDb();
-  const existing = db.select().from(importantContacts).where(eq(importantContacts.id, id)).get();
-  if (existing) deleteUploadIfExists(existing.logoPath);
-  db.delete(importantContacts).where(eq(importantContacts.id, id)).run();
-  return jsonOk({ ok: true });
+
+  try {
+    const { data } = await loadContent<ContactItem[]>("importantContacts");
+    const saved = await saveContent(
+      "importantContacts",
+      data.filter((i) => i.id !== id),
+      "cms: delete contact"
+    );
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }

@@ -1,34 +1,59 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { getDb } from "@/lib/db/client";
-import { pricingCategories, pricingItems, pricingNote, pricingPrices } from "@/lib/db/schema";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import { loadContent, saveContent, SAVE_FLASH } from "@/lib/cms/admin-store";
+
+type PricingPrice = { amount: string; unit?: string };
+type PricingItem = {
+  title: string;
+  description: string;
+  isActive?: boolean;
+  prices: PricingPrice[];
+};
+type PricingSection = {
+  id: string;
+  title: string;
+  note?: string;
+  isActive?: boolean;
+  items: PricingItem[];
+};
+type PricingContent = {
+  note: string;
+  sections: PricingSection[];
+};
 
 export async function GET(request: Request) {
   const gate = await requireAdminApi(request);
   if ("error" in gate && gate.error) return gate.error;
-  const db = getDb();
-  const categories = db
-    .select()
-    .from(pricingCategories)
-    .orderBy(asc(pricingCategories.sortOrder))
-    .all();
-  const items = db.select().from(pricingItems).orderBy(asc(pricingItems.sortOrder)).all();
-  const prices = db.select().from(pricingPrices).orderBy(asc(pricingPrices.sortOrder)).all();
-  const note = db.select().from(pricingNote).get();
-
-  return jsonOk({
-    note: note?.note || "",
-    categories: categories.map((c) => ({
-      ...c,
-      items: items
-        .filter((i) => i.categoryId === c.id)
-        .map((i) => ({
-          ...i,
-          prices: prices.filter((p) => p.itemId === i.id),
+  try {
+    const { data } = await loadContent<PricingContent>("pricing");
+    return jsonOk({
+      note: data.note || "",
+      categories: (data.sections || []).map((section, index) => ({
+        id: index + 1,
+        slug: section.id,
+        title: section.title,
+        note: section.note ?? null,
+        isActive: section.isActive ?? true,
+        items: (section.items || []).map((item, itemIndex) => ({
+          id: itemIndex + 1,
+          title: item.title,
+          description: item.description,
+          isActive: item.isActive ?? true,
+          prices: (item.prices || []).map((p) => ({
+            amount: p.amount,
+            unit: p.unit ?? null,
+          })),
         })),
-    })),
-  });
+      })),
+    });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 const schema = z.object({
@@ -64,59 +89,28 @@ export async function PUT(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
 
-  const db = getDb();
-  db.delete(pricingPrices).run();
-  db.delete(pricingItems).run();
-  db.delete(pricingCategories).run();
-
-  const noteRow = db.select().from(pricingNote).get();
-  if (noteRow) {
-    db.update(pricingNote)
-      .set({ note: parsed.data.note, updatedAt: new Date().toISOString() })
-      .where(eq(pricingNote.id, noteRow.id))
-      .run();
-  } else {
-    db.insert(pricingNote).values({ note: parsed.data.note }).run();
-  }
-
-  parsed.data.categories.forEach((cat, catIndex) => {
-    const category = db
-      .insert(pricingCategories)
-      .values({
-        slug: cat.slug,
+  try {
+    const next: PricingContent = {
+      note: parsed.data.note,
+      sections: parsed.data.categories.map((cat) => ({
+        id: cat.slug,
         title: cat.title,
-        note: cat.note ?? null,
-        sortOrder: catIndex,
-        isActive: cat.isActive ?? true,
-      })
-      .returning()
-      .get();
-
-    cat.items.forEach((item, itemIndex) => {
-      const inserted = db
-        .insert(pricingItems)
-        .values({
-          categoryId: category.id,
+        ...(cat.note ? { note: cat.note } : {}),
+        ...(cat.isActive === false ? { isActive: false } : {}),
+        items: cat.items.map((item) => ({
           title: item.title,
           description: item.description,
-          sortOrder: itemIndex,
-          isActive: item.isActive ?? true,
-        })
-        .returning()
-        .get();
-
-      item.prices.forEach((price, priceIndex) => {
-        db.insert(pricingPrices)
-          .values({
-            itemId: inserted.id,
-            amount: price.amount,
-            unit: price.unit ?? null,
-            sortOrder: priceIndex,
-          })
-          .run();
-      });
-    });
-  });
-
-  return jsonOk({ ok: true });
+          ...(item.isActive === false ? { isActive: false } : {}),
+          prices: item.prices.map((p) => ({
+            amount: p.amount,
+            ...(p.unit ? { unit: p.unit } : {}),
+          })),
+        })),
+      })),
+    };
+    const saved = await saveContent("pricing", next, "cms: update pricing");
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }

@@ -1,18 +1,25 @@
-import { asc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { reorderByDirection } from "@/lib/cms/reorder";
-import { getDb } from "@/lib/db/client";
-import { siteReferences } from "@/lib/db/schema";
-import { deleteUploadIfExists } from "@/lib/uploads/storage";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import {
+  loadContent,
+  nextId,
+  reorderItems,
+  saveContent,
+  SAVE_FLASH,
+} from "@/lib/cms/admin-store";
 
-export async function GET(request: Request) {
-  const gate = await requireAdminApi(request);
-  if ("error" in gate && gate.error) return gate.error;
-  return jsonOk({
-    items: getDb().select().from(siteReferences).orderBy(asc(siteReferences.sortOrder)).all(),
-  });
-}
+type ReferenceItem = {
+  id: number;
+  name: string;
+  imagePath: string;
+  isActive: boolean;
+  sortOrder: number;
+};
 
 const schema = z.object({
   id: z.number().optional(),
@@ -21,53 +28,75 @@ const schema = z.object({
   isActive: z.boolean().optional(),
 });
 
+export async function GET(request: Request) {
+  const gate = await requireAdminApi(request);
+  if ("error" in gate && gate.error) return gate.error;
+  try {
+    const { data } = await loadContent<ReferenceItem[]>("references");
+    const items = [...data].sort((a, b) => a.sortOrder - b.sortOrder);
+    return jsonOk({ items });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
+}
+
 export async function POST(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const sortOrder =
-    db.select().from(siteReferences).all().reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
-  const item = db
-    .insert(siteReferences)
-    .values({
+
+  try {
+    const { data } = await loadContent<ReferenceItem[]>("references");
+    const sortOrder = data.reduce((m, r) => Math.max(m, r.sortOrder), -1) + 1;
+    const item: ReferenceItem = {
+      id: nextId(data),
       name: parsed.data.name,
       imagePath: parsed.data.imagePath,
       isActive: parsed.data.isActive ?? true,
       sortOrder,
-    })
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    await saveContent("references", [...data, item], "cms: create reference");
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function PATCH(request: Request) {
   const gate = await requireAdminApi(request, { mutate: true });
   if ("error" in gate && gate.error) return gate.error;
   const body = await request.json().catch(() => null);
-  if (body?.action === "reorder") {
-    reorderByDirection(siteReferences, Number(body.id), body.direction === "up" ? "up" : "down");
-    return jsonOk({ ok: true });
-  }
-  const parsed = schema.extend({ id: z.number() }).safeParse(body);
-  if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const existing = db.select().from(siteReferences).where(eq(siteReferences.id, parsed.data.id)).get();
-  if (!existing) return jsonError("Záznam neexistuje.", 404);
-  if (parsed.data.imagePath !== existing.imagePath) deleteUploadIfExists(existing.imagePath);
-  const item = db
-    .update(siteReferences)
-    .set({
+
+  try {
+    const { data } = await loadContent<ReferenceItem[]>("references");
+
+    if (body?.action === "reorder") {
+      const next = reorderItems(data, Number(body.id), body.direction === "up" ? "up" : "down");
+      const saved = await saveContent("references", next, "cms: reorder references");
+      return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+    }
+
+    const parsed = schema.extend({ id: z.number() }).safeParse(body);
+    if (!parsed.success) return jsonError("Neplatné údaje.");
+    const existing = data.find((i) => i.id === parsed.data.id);
+    if (!existing) return jsonError("Záznam neexistuje.", 404);
+
+    const item: ReferenceItem = {
+      ...existing,
       name: parsed.data.name,
       imagePath: parsed.data.imagePath,
       isActive: parsed.data.isActive ?? true,
-      updatedAt: new Date().toISOString(),
-    })
-    .where(eq(siteReferences.id, parsed.data.id))
-    .returning()
-    .get();
-  return jsonOk({ item });
+    };
+    await saveContent(
+      "references",
+      data.map((i) => (i.id === item.id ? item : i)),
+      "cms: update reference"
+    );
+    return jsonOk({ item });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -75,9 +104,16 @@ export async function DELETE(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const id = Number((await request.json().catch(() => null))?.id);
   if (!id) return jsonError("Chýba ID.");
-  const db = getDb();
-  const existing = db.select().from(siteReferences).where(eq(siteReferences.id, id)).get();
-  if (existing) deleteUploadIfExists(existing.imagePath);
-  db.delete(siteReferences).where(eq(siteReferences.id, id)).run();
-  return jsonOk({ ok: true });
+
+  try {
+    const { data } = await loadContent<ReferenceItem[]>("references");
+    const saved = await saveContent(
+      "references",
+      data.filter((i) => i.id !== id),
+      "cms: delete reference"
+    );
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }

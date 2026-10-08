@@ -1,18 +1,45 @@
-import { eq } from "drizzle-orm";
 import { z } from "zod";
-import { jsonError, jsonOk, requireAdminApi } from "@/lib/api/admin-guard";
-import { getDb } from "@/lib/db/client";
-import { changeManagerCta, heroContent } from "@/lib/db/schema";
-import { deleteUploadIfExists } from "@/lib/uploads/storage";
+import {
+  jsonError,
+  jsonFromUnknownError,
+  jsonOk,
+  requireAdminApi,
+} from "@/lib/api/admin-guard";
+import { loadContent, saveContent, SAVE_FLASH } from "@/lib/cms/admin-store";
+
+type HeroContent = {
+  headlineLines: string[];
+  imageSrc: string;
+  changeManager: {
+    intro: string;
+    quotes: Array<{ text: string; citation?: string }>;
+    downloadUrl: string | null;
+    downloadPath: string | null;
+    backgroundImagePath: string | null;
+  };
+};
 
 export async function GET(request: Request) {
   const gate = await requireAdminApi(request);
   if ("error" in gate && gate.error) return gate.error;
-  const db = getDb();
-  return jsonOk({
-    hero: db.select().from(heroContent).get() || null,
-    changeManager: db.select().from(changeManagerCta).get() || null,
-  });
+  try {
+    const { data } = await loadContent<HeroContent>("hero");
+    return jsonOk({
+      hero: {
+        headlineLinesJson: JSON.stringify(data.headlineLines),
+        imagePath: data.imageSrc,
+      },
+      changeManager: {
+        intro: data.changeManager.intro,
+        quotesJson: JSON.stringify(data.changeManager.quotes),
+        downloadPath: data.changeManager.downloadPath,
+        downloadUrl: data.changeManager.downloadUrl,
+        backgroundImagePath: data.changeManager.backgroundImagePath,
+      },
+    });
+  } catch (e) {
+    return jsonFromUnknownError(e);
+  }
 }
 
 const schema = z.object({
@@ -39,57 +66,27 @@ export async function PUT(request: Request) {
   if ("error" in gate && gate.error) return gate.error;
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return jsonError("Neplatné údaje.");
-  const db = getDb();
-  const hero = db.select().from(heroContent).get();
-  const lines = JSON.stringify(parsed.data.headlineLines);
-  if (hero) {
-    if (parsed.data.imagePath && parsed.data.imagePath !== hero.imagePath) {
-      deleteUploadIfExists(hero.imagePath);
-    }
-    db.update(heroContent)
-      .set({
-        headlineLinesJson: lines,
-        imagePath: parsed.data.imagePath ?? hero.imagePath,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(heroContent.id, hero.id))
-      .run();
-  } else {
-    db.insert(heroContent)
-      .values({
-        headlineLinesJson: lines,
-        imagePath: parsed.data.imagePath ?? null,
-      })
-      .run();
-  }
 
-  if (parsed.data.changeManager) {
+  try {
+    const { data: existing } = await loadContent<HeroContent>("hero");
     const cm = parsed.data.changeManager;
-    const existing = db.select().from(changeManagerCta).get();
-    if (existing) {
-      db.update(changeManagerCta)
-        .set({
-          intro: cm.intro,
-          quotesJson: JSON.stringify(cm.quotes),
-          downloadPath: cm.downloadPath ?? null,
-          downloadUrl: cm.downloadUrl ?? null,
-          backgroundImagePath: cm.backgroundImagePath ?? existing.backgroundImagePath,
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(changeManagerCta.id, existing.id))
-        .run();
-    } else {
-      db.insert(changeManagerCta)
-        .values({
-          intro: cm.intro,
-          quotesJson: JSON.stringify(cm.quotes),
-          downloadPath: cm.downloadPath ?? null,
-          downloadUrl: cm.downloadUrl ?? null,
-          backgroundImagePath: cm.backgroundImagePath ?? null,
-        })
-        .run();
-    }
+    const next: HeroContent = {
+      headlineLines: parsed.data.headlineLines,
+      imageSrc: parsed.data.imagePath || existing.imageSrc,
+      changeManager: cm
+        ? {
+            intro: cm.intro,
+            quotes: cm.quotes,
+            downloadPath: cm.downloadPath ?? null,
+            downloadUrl: cm.downloadUrl ?? null,
+            backgroundImagePath:
+              cm.backgroundImagePath ?? existing.changeManager.backgroundImagePath,
+          }
+        : existing.changeManager,
+    };
+    const saved = await saveContent("hero", next, "cms: update hero");
+    return jsonOk({ ok: true, message: SAVE_FLASH, commitSha: saved.commitSha });
+  } catch (e) {
+    return jsonFromUnknownError(e);
   }
-
-  return jsonOk({ ok: true });
 }
