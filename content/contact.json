@@ -1,0 +1,54 @@
+{
+  "contact": {
+    "person": "PaedDr. Michal Hudec, PhD.",
+    "email": "bytexnitra@gmail.com",
+    "phone": "+421 907 615 135",
+    "phoneHref": "tel:+421907615135",
+    "addressLine1": "Jurkovičova 385/1, 949 11 Nitra",
+    "addressLine2": "Zvonček 050, 11. poschodie",
+    "facebookUrl": "https://www.facebook.com/profile.php?id=61556337906214",
+    "instagramUrl": "https://www.instagram.com/bytex.nitra/?fbclid=IwAR2R9Dj4Br3B8hU6H4NV92IdCeWAaFBtK-RDpL0R50C-AOiAd5_RHCNvbVQ",
+    "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3976!2d18.068075!3d48.305988!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sJurkovi%C4%8Dova+385%2F1%2C+Nitra%2C+949+11!5e0!3m2!1ssk!2sSK!4v1791377097000",
+    "clientCentreIntro": "Klientske centrum umožňuje klientom rýchle a jednoduché vybavenie požiadaviek spojených so správou bytových a nebytových priestorov na jednom mieste. Pracovník centra poskytne radu a pomoc, prípadne usmerní majiteľov bytov na ďalší postup na kompletné vybavenie Vašej žiadosti.",
+    "formIntroBeforeEmail": "V prípade otázok nás môžete kontaktovať prostredníctvom emailu \"",
+    "formIntroAfterEmail": "\" alebo vyplnením kontaktného formuláru."
+  },
+  "hours": [
+    {
+      "day": "Pondelok",
+      "timeText": "Nestránkový deň",
+      "isOpen": false,
+      "sortOrder": 0
+    },
+    {
+      "day": "Utorok",
+      "timeText": "14:00 - 18:00",
+      "isOpen": true,
+      "sortOrder": 1
+    },
+    {
+      "day": "Streda",
+      "timeText": "Nestránkový deň",
+      "isOpen": false,
+      "sortOrder": 2
+    },
+    {
+      "day": "Štvrtok",
+      "timeText": "14:00 - 18:00",
+      "isOpen": true,
+      "sortOrder": 3
+    },
+    {
+      "day": "Piatok",
+      "timeText": "Nestránkový deň",
+      "isOpen": false,
+      "sortOrder": 4
+    }
+  ],
+  "settings": {
+    "companyName": "BYTEX Nitra, s.r.o.",
+    "ico": "55 420 401",
+    "dic": "2122045123",
+    "copyrightText": "© 2026 BYTEX Nitra, s.r.o."
+  }
+}

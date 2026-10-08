@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "name": "Ďurčanského 934/18, Nitra",
+    "imagePath": "/uploads/references/ref-1.jpg",
+    "isActive": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "name": "SVB Mikovíniho 18 a 20",
+    "imagePath": "/uploads/references/ref-2.jpg",
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "name": "Beethovenova 450/2 - 4, Nitra",
+    "imagePath": "/uploads/references/ref-3.jpg",
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "name": "Hlohovecká 826/1, Lužianky",
+    "imagePath": "/uploads/references/ref-4.jpg",
+    "isActive": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 5,
+    "name": "Jurkovičova 385/1, Nitra",
+    "imagePath": "/uploads/references/ref-5.jpg",
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 6,
+    "name": "Za Humnami 511/2, Veľký Cetín",
+    "imagePath": "/uploads/references/ref-6.jpg",
+    "isActive": true,
+    "sortOrder": 5
+  }
+]

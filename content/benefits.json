@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "body": "Seriózne a ústretové jednanie so všetkými vlastníkmi objektov - po dohode aj vo vlastnom bytovom dome.",
+    "iconKey": "message",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "body": "Pracujeme pre Vás nonstop 24 hodín denne a 7 dní v týždni.",
+    "iconKey": "clock",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "body": "Úzka spolupráca s vlastníkmi bytov a spoločné prehodnocovanie potrebných investícií.",
+    "iconKey": "users",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "body": "Sústavná starostlivosť o komfort bývania.",
+    "iconKey": "home",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 5,
+    "body": "Pružnejšie a efektívnejšie vykonávanie jednotlivých opráv v dome odbornými pracovníkmi.",
+    "iconKey": "wrench",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 6,
+    "body": "Predĺženie životnosti objektov pravidelnými kontrolami a z nich vyplývajúcimi údržbárskymi a servisnými prácami.",
+    "iconKey": "shield",
+    "emphasize": false,
+    "isActive": true,
+    "sortOrder": 5
+  },
+  {
+    "id": 7,
+    "body": "Informovanosť, komunikácia, oznamy, tlačivá, elektronické hlasovanie cez platformu Resitech.",
+    "iconKey": "device",
+    "emphasize": true,
+    "isActive": true,
+    "sortOrder": 6
+  }
+]

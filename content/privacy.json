@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "heading": "Kto spracúva Vaše osobné údaje a ako ho môžete kontaktovať?",
+    "body": "Vaše osobné údaje spracúva spoločnosť BYTEX Nitra, s.r.o., ktorú môžete kontaktovať na adrese Jurkovičova 385/1, 949 01 Nitra alebo e-mailom na adrese bytexnitra@gmail.com",
+    "isActive": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "heading": "Na aký účel budú spracúvané Vaše osobné údaje?",
+    "body": "Vaše osobné údaje budeme spracúvať na účel vybavenia Vašej požiadavky, objednávky alebo podnetu, na účel plnenia zmluvy, na účel ochrany práv a právom chránených záujmov alebo na účel plnenia našich povinností. Ak ste nám udelili súhlas, Vaše osobné údaje môžu byť použité v súlade s udeleným súhlasom.",
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "heading": "Čo nám umožňuje spracúvať Vaše osobné údaje?",
+    "body": "Vaše osobné údaje nám umožňujú spracúvať právne predpisy, a to v prípade, ak je spracúvanie nevyhnutné na plnenie zmluvy uzatvorenej s Vami alebo aby sa na základe Vašej žiadosti vykonali opatrenia pred uzatvorením zmluvy, a tiež v prípade, ak je spracúvanie nevyhnutné na plnenie našich povinností. Ak ste nám udelili súhlas so spracúvaním Vašich osobných údajov, Vaše osobné údaje budú spracúvané na základe Vášho súhlasu. Vaše osobné údaje môžu byť tiež spracúvané z dôvodu oprávneného záujmu, ktorý môže súvisieť s ochranou práv alebo oprávnených záujmov.",
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "heading": "Komu Vaše osobné údaje budeme poskytovať?",
+    "body": "Vaše osobné údaje môžeme poskytnúť osobám, ktoré sa budú podieľať na ich spracúvaní a iným osobám alebo subjektom, ak to ustanovuje alebo umožňuje právny predpis.",
+    "isActive": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 5,
+    "heading": "Ako dlho budeme uchovávať Vaše osobné údaje?",
+    "body": "Vaše osobné údaje budeme uchovávať počas doby, kým bude existovať naše oprávnenie alebo povinnosť ich spracúvať, najmä počas doby plnenia zmluvy, počas doby na uplatnenie právnych nárokov alebo počas doby, ktorú určuje právny predpis. Ak sa spracúvanie Vašich osobných údajov uskutočňuje iba na základe Vášho súhlasu, Vaše osobné údaje budeme spracúvať iba počas jeho trvania, pričom máte právo svoj súhlas kedykoľvek odvolať prostredníctvom našich kontaktných údajov.",
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 6,
+    "heading": "Aké sú Vaše práva pri spracúvaní osobných údajov?",
+    "body": "Medzi Vaše práva patrí právo požadovať od nás prístup k osobným údajom, ktoré sa Vás týkajú, právo na opravu osobných údajov, právo na vymazanie osobných údajov alebo právo na obmedzenie spracúvania osobných údajov, právo namietať spracúvanie osobných údajov a právo na prenosnosť osobných údajov. Ak sa domnievate, že došlo k porušeniu Vašich práv pri spracúvaní osobných údajov, môžete sa obrátiť na Úrad na ochranu osobných údajov Slovenskej republiky.",
+    "isActive": true,
+    "sortOrder": 5
+  },
+  {
+    "id": 7,
+    "heading": "Je potrebné, aby ste nám Vaše osobné údaje poskytli?",
+    "body": "Poskytovanie Vašich osobných údajov môže vyžadovať právny predpis, zmluva alebo uskutočnenie úkonov pred jej uzatvorením, prípadne splnenie iného účelu ich spracúvania, najmä vybavenie Vašej požiadavky, objednávky, podnetu, plnenie zmluvy alebo našej povinnosti. Ak má byť naplnený účel spracúvania, je nevyhnutné poskytnutie Vašich osobných údajov. Následkom neposkytnutia osobných údajov môže byť nemožnosť splnenia Vašej požiadavky, naplnenia účelu ich spracúvania, porušenie zmluvy alebo právneho predpisu. V prípade, ak by ste mali akékoľvek otázky ohľadne spracúvania Vašich osobných údajov alebo Vašich práv a povinností, neváhajte nás kontaktovať.",
+    "isActive": true,
+    "sortOrder": 6
+  }
+]

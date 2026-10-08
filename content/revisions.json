@@ -1,0 +1,77 @@
+{
+  "intro": "V bytových domoch sa nachádzajú aj spoločné zariadenia (§ 2 ods. 5 zákona č. 182/1993 Z. z.), ktoré si z hľadiska bezpečnosti, prevádzkyschopnosti alebo spoľahlivosti vyžadujú vykonávanie pravidelných odborných prehliadok, revízií, skúšok a overovaní:",
+  "items": [
+    {
+      "id": 1,
+      "title": "Rozvody elektroinštalácie",
+      "frequency": "5 rokov",
+      "body": "Vykonávajú sa každých 5 rokov, v mokrom prostredí (napr. práčovne) každý rok.",
+      "isActive": true,
+      "sortOrder": 0
+    },
+    {
+      "id": 2,
+      "title": "Sústava bleskozvodov",
+      "frequency": "4 roky / 2 roky",
+      "body": "Vykonávajú sa každé 4 roky, prípadne každé 2 roky, podľa úrovni ochrany.",
+      "isActive": true,
+      "sortOrder": 1
+    },
+    {
+      "id": 3,
+      "title": "Plynové rozvody",
+      "frequency": "1 rok / 3 roky",
+      "body": "Každý rok sa musí uskutočniť kontrola hlavného prívodu plynu až po stúpací rozvod, každé 3 roky sa musí uskutočniť odborná prehliadka plynových rozvodov, pri ktorej sa kontroluje a meria prípadný únik plynu.",
+      "isActive": true,
+      "sortOrder": 2
+    },
+    {
+      "id": 4,
+      "title": "Hydranty a hasiace prístroje",
+      "frequency": "1 rok",
+      "body": "Kontrola funkčnosti hasiacich prístrojov a hydrantov, úplnosť ich vybavenia a tlaková skúška hydrantov sa vykonáva každý rok.",
+      "isActive": true,
+      "sortOrder": 3
+    },
+    {
+      "id": 5,
+      "title": "Požiarna ochrana",
+      "frequency": "1 rok",
+      "body": "Vykonáva sa každý rok. Súčasťou takejto prehliadky je kontrola únikových ciest a východov, ktoré sa musia označovať a udržiavať trvalo voľné, ako aj prístup k uzáverom rozvodných zariadení elektrickej energie, plynu, vody, k požiarnotechnickým zariadeniam a požiarnym vodovodom.",
+      "isActive": true,
+      "sortOrder": 4
+    },
+    {
+      "id": 6,
+      "title": "Komíny",
+      "frequency": "1 rok / 2× ročne",
+      "body": "Kontrola ich stavu, spôsobilosti a ich čistenie sa vykonáva taktiež každý rok, v niektorých prípadoch aj 2x ročne.",
+      "isActive": true,
+      "sortOrder": 5
+    },
+    {
+      "id": 7,
+      "title": "Výťahy",
+      "frequency": "3 mesiace / 3 roky / 6 rokov",
+      "body": "Odborné prehliadky každé 3 mesiace, opakované odborné záťažové skúšky každé 3 roky, opakované úradné skúšky každých 6 rokov.",
+      "isActive": true,
+      "sortOrder": 6
+    },
+    {
+      "id": 8,
+      "title": "Vodomer studená voda",
+      "frequency": "5 rokov",
+      "body": "Pri vodomeroch na studenú vodu príslušná právna úprava (zákon č. 142/2000 Z. z. o metrológii ukladá povinnosť vykonávať opakované overovania a repasáciu meradiel každých 5 rokov.",
+      "isActive": true,
+      "sortOrder": 7
+    },
+    {
+      "id": 9,
+      "title": "Vodomer teplá voda",
+      "frequency": "5 rokov",
+      "body": "Na vodomery na teplú vodu sa vzťahujú ustanovenia jednak zákona o tepelnej energetike č. 657/2004 Z. z. tak aj zákona o metrológii, ktoré ukladajú povinnosť vykonávať opakované overovania a repasáciu meradiel každých 5 rokov.",
+      "isActive": true,
+      "sortOrder": 8
+    }
+  ]
+}

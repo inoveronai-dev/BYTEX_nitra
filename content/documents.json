@@ -1,0 +1,95 @@
+{
+  "intro": "Tu si môžete stiahnuť potrebné dokumenty na splnomocnenie osoby na schôdzy, dokumenty potrebné pri predaji bytu, pristúpenie k zmluve o výkone správy a vzor žiadosti na stavebné úpravy v byte. Všetky žiadosti môžete zaslať podpísané a oskenované mailom na adresu bytexnitra@gmail.com alebo sa môžeme stretnúť osobne po telefonickom dohovore.",
+  "items": [
+    {
+      "id": 1,
+      "title": "Splnomocnenie na zastupovanie vlastníka bytu na schôdzi",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000033-7f44f7f452/Splnomocnenie%20vlastn%C3%ADka_sch%C3%B4dza.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 0
+    },
+    {
+      "id": 2,
+      "title": "Protokol o odovzdaní a prevzatí bytu do užívania",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000050-3008030082/Protokol%20a%20odovzdan%C3%AD%20a%20prevzat%C3%AD%20bytu%20do%20u%C5%BE%C3%ADvania%20-2.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 1
+    },
+    {
+      "id": 3,
+      "title": "Tlačivo na odpočet vodomerov",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000052-72bd072bd3/Odpo%C4%8Det%20vodomerov.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 2
+    },
+    {
+      "id": 4,
+      "title": "Oznámenie o pristúpení k zmluve o výkone správy",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000041-cc724cc727/Ozn%C3%A1menie%20o%20prist%C3%BApen%C3%AD%20k%20zmluve%20o%20v%C3%BDkone%20spr%C3%A1vy.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 3
+    },
+    {
+      "id": 5,
+      "title": "Dohoda o splátkach",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000035-1554d1554f/Dohoda%20o%20spl%C3%A1tkach.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 4
+    },
+    {
+      "id": 6,
+      "title": "Žiadosť o elektronické zasielanie",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000051-7ad887ad8a/suhlas_so_zasielanim_dokumentov_formou_e_mailovej_spravy.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 5
+    },
+    {
+      "id": 7,
+      "title": "Žiadosť o stavebné úpravy",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000034-bb199bb19c/ziadost_o_vydanie_predbezneho_suhlasu_na_stavebnu_upravu.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 6
+    },
+    {
+      "id": 8,
+      "title": "Oznámenie škodovej udalosti",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000039-4bffe4c001/oznamenie_skodovej_udalosti_efc.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 7
+    },
+    {
+      "id": 9,
+      "title": "Objednávka na vykonanie opráv",
+      "filePath": null,
+      "externalUrl": "https://d9651b25e0.clvaw-cdnwnd.com/751510981f5ea21da00aa9cb8de7515e/200000053-3626b3626d/Objedn%C3%A1vka%20na%20vykonanie%20opr%C3%A1v.pdf?ph=d9651b25e0",
+      "mimeType": null,
+      "fileExt": null,
+      "isActive": true,
+      "sortOrder": 8
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Ekonomická činnosť",
+    "description": "Evidencia platieb a tvorba predpisov, upomínanie platieb v omeškaní, vedenie samostatného účtovníctva, založenie a vedenie bankových účtov pre jednotlivé objekty, ročné vyúčtovanie, poistenie nehnuteľnosti.",
+    "imagePath": "/uploads/services/service-1.jpg",
+    "imageClassName": "object-left-bottom",
+    "imageOverlayClassName": "bg-gradient-to-t from-[#111111]/25 via-transparent to-black/10",
+    "isActive": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "title": "Technická činnosť",
+    "description": "Starostlivosť o stavebný a technický stav budov, periodické revízie, zabezpečenie projektových prác, inžinierskej činnosti a energetických certifikátov, zostavovanie ročných plánov opráv.",
+    "imagePath": "/uploads/services/service-2.jpg",
+    "imageClassName": "object-center",
+    "imageOverlayClassName": "bg-gradient-to-t from-[#111111]/40 via-transparent to-transparent",
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "title": "Prevádzková činnosť",
+    "description": "Kontrola nad všetkými prevádzkovými procesmi, s ktorými sa vlastníci denne priamo stretávajú. Zabezpečenie všetkých služieb spojených s prevádzkou bytových domov (upratovanie, dodávka tepla, TÚV, studenej vody, plynu, elektriny, odvoz a likvidácia odpadu, dezinfekcia, dezinsekcia, deratizácia).",
+    "imagePath": "/uploads/services/service-3.jpg",
+    "imageClassName": null,
+    "imageOverlayClassName": null,
+    "isActive": true,
+    "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "title": "Havarijná služba",
+    "description": "Štandardne poskytovaná služba bez poplatku na bytovú jednotku. Službu zabezpečujú a vykonávajú externé spoločnosti s najvýhodnejšou cenou. Zásah vo sfére spoločných častí a spoločných zariadení bytového domu je hradený z fondu opráv a zásah v byte a týkajúci sa výlučne bytu je hradený vlastníkom bytu.",
+    "imagePath": "/uploads/services/service-4.jpg",
+    "imageClassName": null,
+    "imageOverlayClassName": null,
+    "isActive": true,
+    "sortOrder": 3
+  },
+  {
+    "id": 5,
+    "title": "Právna činnosť",
+    "description": "Informovanie vlastníkov o aktuálnych zmenách zákonov týkajúcich sa prevádzky objektu, vymáhanie nedoplatkov a zabezpečenie dobrovoľných dražieb, dozor nad užívaním nehnuteľnosti v súlade so zákonom.",
+    "imagePath": "/uploads/services/service-5.jpg",
+    "imageClassName": null,
+    "imageOverlayClassName": null,
+    "isActive": true,
+    "sortOrder": 4
+  },
+  {
+    "id": 6,
+    "title": "Upratovacia činnosť",
+    "description": "Ako správca bytových domov spolupracujeme s upratovacou firmou UP Cleaning prostredníctvom ktorej Vám vieme zabezpečiť upratovanie spoločných priestorov v bytovom dome za výhodné ceny.",
+    "imagePath": "/uploads/services/service-6.jpg",
+    "imageClassName": null,
+    "imageOverlayClassName": null,
+    "isActive": true,
+    "sortOrder": 5
+  }
+]

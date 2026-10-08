@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "Sana – profesionálne čistenie fasád",
+    "logoPath": "/uploads/partners/partner-1.png",
+    "url": null,
+    "isActive": true,
+    "sortOrder": 0
+  },
+  {
+    "id": 2,
+    "name": "Resitech – digitálna platforma pre vlastníkov",
+    "logoPath": "/uploads/partners/partner-2.png",
+    "url": null,
+    "isActive": true,
+    "sortOrder": 1
+  },
+  {
+    "id": 3,
+    "name": "BYTEX Nitra SERVIS – servis bytových domov",
+    "logoPath": "/uploads/partners/partner-3.png",
+    "url": null,
+    "isActive": true,
+    "sortOrder": 2
+  }
+]
