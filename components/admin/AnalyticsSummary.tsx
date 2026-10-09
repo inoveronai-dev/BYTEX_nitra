@@ -19,23 +19,31 @@ export function AnalyticsSummary() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const res = await adminFetch("/api/admin/analytics");
-      const body = (await res.json().catch(() => ({}))) as Summary & {
-        error?: string;
-      };
-      if (cancelled) return;
-      if (!res.ok) {
-        setError(body.error || "Analytiku sa nepodarilo načítať.");
-        setData(null);
-      } else {
-        setError(null);
-        setData({
-          visitors: body.visitors ?? 0,
-          pageviews: body.pageviews ?? 0,
-          periodDays: body.periodDays ?? 30,
-        });
+      try {
+        const res = await adminFetch("/api/admin/analytics");
+        const body = (await res.json().catch(() => ({}))) as Summary & {
+          error?: string;
+        };
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body.error || "Analytiku sa nepodarilo načítať.");
+          setData(null);
+        } else {
+          setError(null);
+          setData({
+            visitors: body.visitors ?? 0,
+            pageviews: body.pageviews ?? 0,
+            periodDays: body.periodDays ?? 30,
+          });
+        }
+      } catch {
+        if (!cancelled) {
+          setError("Analytiku sa nepodarilo načítať.");
+          setData(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
     return () => {
       cancelled = true;
