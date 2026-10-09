@@ -40,5 +40,12 @@
     "imagePath": "/uploads/references/ref-6.jpg",
     "isActive": true,
     "sortOrder": 5
+  },
+  {
+    "id": 7,
+    "name": "RADLINSKÉHO 105/3, NITRA",
+    "imagePath": "/uploads/references/743be197-0f60-4ebb-838d-aaba12e6e6c2.jpg",
+    "isActive": true,
+    "sortOrder": 6
   }
 ]
