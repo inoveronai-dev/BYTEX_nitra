@@ -26,8 +26,13 @@ Copy `.env.example` → `.env.local` (local) and set the same keys in Vercel:
 | `GITHUB_REPO` | Repo name (`BYTEX_nitra`) |
 | `GITHUB_BRANCH` | Branch to commit to (`main` in prod; test branch for previews) |
 | `GITHUB_CONTENT_TOKEN` | Fine-grained PAT with Contents **Read and write** |
+| `VERCEL_TOKEN` | Token to read Web Analytics API (admin dashboard) |
+| `VERCEL_PROJECT_ID` | Vercel project ID (`prj_…`) |
+| `VERCEL_TEAM_ID` | Vercel team ID (`team_…`) if the project is under a team |
 
 Never commit secrets. Never use `NEXT_PUBLIC_` for the token.
+
+Web Analytics: enable in the Vercel project (Analytics → Enable) and keep `@vercel/analytics` in the root layout. `/admin` routes are excluded via `beforeSend`. Admin dashboard reads last-30-day totals from the Web Analytics API only through `/api/admin/analytics` (auth required).
 
 ## 3. GitHub token
 

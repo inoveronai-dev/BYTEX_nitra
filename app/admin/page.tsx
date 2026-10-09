@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnalyticsSummary } from "@/components/admin/AnalyticsSummary";
 import { PageHeader, Card } from "@/components/admin/ui";
 import { adminNav } from "@/lib/admin/nav";
 import documentsJson from "@/content/documents.json";
@@ -16,6 +17,7 @@ export default function AdminDashboardPage() {
         title="Prehľad"
         description="Spravujte obsah webu BYTEX Nitra. Uloženie vytvorí commit na GitHub a Vercel web aktualizuje (zvyčajne do 1–2 minút)."
       />
+      <AnalyticsSummary />
       <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card>
           <p className="text-xs uppercase tracking-wider text-charcoal/45">Služby</p>
