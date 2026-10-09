@@ -25,7 +25,7 @@ export default function DownloadsPage() {
             <h1 className="font-serif text-3xl font-light tracking-tight text-charcoal-deep sm:text-4xl">
               Dokumenty a tlačivá
             </h1>
-            <p className="mt-6 text-sm font-light leading-relaxed text-charcoal/75 sm:text-[0.95rem] sm:leading-[1.8]">
+            <p className="mt-6 text-sm font-light leading-relaxed text-charcoal/75 text-justify hyphens-auto sm:text-[0.95rem] sm:leading-[1.8]">
               {data.intro}
             </p>
             <div className="mt-10">

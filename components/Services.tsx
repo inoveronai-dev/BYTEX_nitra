@@ -51,7 +51,7 @@ export default function Services({ items = [] }: { items?: ServiceItem[] }) {
                   <h3 className="text-sm font-normal uppercase tracking-[0.18em] text-gold-light">
                     {service.title}
                   </h3>
-                  <p className="mt-4 text-sm font-light leading-relaxed text-cream/70 sm:leading-[1.8]">
+                  <p className="mt-4 text-sm font-light leading-relaxed text-cream/70 text-justify hyphens-auto sm:leading-[1.8]">
                     {service.description}
                   </p>
                 </div>

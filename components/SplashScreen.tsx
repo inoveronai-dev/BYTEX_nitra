@@ -169,12 +169,13 @@ export default function SplashScreen() {
         }`}
       >
         <Image
-          src="/logo-bytex.png"
-          alt="BYTEX Nitra"
-          width={714}
-          height={510}
+          src="/bytex-logo-full-v4.png"
+          alt="BYTEX Nitra, s.r.o. — správa bytových domov"
+          width={1324}
+          height={968}
           priority
-          className="h-auto w-[132px] sm:w-[150px] md:w-[165px]"
+          unoptimized
+          className="h-auto w-[132px] object-contain sm:w-[150px] md:w-[165px]"
         />
 
         <span

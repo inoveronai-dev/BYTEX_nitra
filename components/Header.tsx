@@ -140,12 +140,13 @@ export default function Header() {
             </span>
           ) : (
             <Image
-              src="/logo-bytex.png"
-              alt="BYTEX Nitra, s.r.o. / BYTEX Nitra SERVIS, s.r.o."
-              width={714}
-              height={510}
-              className="h-10 w-auto md:h-12"
+              src="/bytex-logo-full-v4.png"
+              alt="BYTEX Nitra, s.r.o. — správa bytových domov"
+              width={1324}
+              height={968}
+              className="h-auto w-[170px] object-contain object-left sm:w-[180px] md:w-[190px]"
               priority
+              unoptimized
             />
           )}
         </Link>

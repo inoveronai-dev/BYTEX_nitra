@@ -11,28 +11,14 @@ type RevisionItem = {
 
 const PREVIEW_COUNT = 3;
 
-function FrequencyLabel({
-  interval,
-  isActive,
-}: {
-  interval: string;
-  isActive: boolean;
-}) {
+function FrequencyLabel({ interval }: { interval: string }) {
   const parts = interval.split(" / ");
   const isMultiLine = parts.length >= 3;
 
   return (
-    <span
-      className={`font-serif h-auto shrink-0 self-start pt-px transition-colors duration-300 sm:w-36 md:w-40 ${
-        isActive ? "text-gold" : "text-charcoal-deep/75"
-      } ${
-        isMultiLine
-          ? "text-base leading-[1.1] tracking-tight sm:text-lg sm:leading-[1.12] md:text-xl md:leading-[1.12]"
-          : "text-lg leading-none tracking-tight sm:text-xl md:text-[1.45rem]"
-      }`}
-    >
+    <span className="h-auto w-[7.5rem] shrink-0 self-start text-sm font-normal leading-snug tracking-wide text-charcoal-deep sm:w-36 sm:text-[0.9375rem] md:w-40">
       {isMultiLine ? (
-        <span className="flex flex-col justify-center">
+        <span className="flex flex-col">
           {parts.map((part, index) => (
             <span key={part}>
               {part}
@@ -80,7 +66,7 @@ function RevisionRow({
       }}
     >
       <div className="flex h-auto w-full items-start gap-3 py-1.5 sm:gap-5 sm:py-2 md:gap-7">
-        <FrequencyLabel interval={item.frequency} isActive={isActive} />
+        <FrequencyLabel interval={item.frequency} />
 
         <div className="min-h-0 min-w-0 flex-1 self-start">
           <button
