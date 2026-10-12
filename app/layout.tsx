@@ -19,6 +19,16 @@ export const metadata: Metadata = {
   title: "BYTEX Nitra – Správa a servis bytových domov",
   description:
     "Správcovská spoločnosť zameraná na správu bytových domov v Nitre. Individuálny prístup a komplexný komfort pre každého užívateľa.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
