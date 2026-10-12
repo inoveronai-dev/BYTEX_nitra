@@ -1,6 +1,9 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
+
+const BASIN_ENDPOINT = "https://usebasin.com/f/d638cf638315";
+const MAX_FILE_BYTES = 3 * 1024 * 1024;
 
 const requestOptions = ["Žiadosť", "Porucha", "Zaslanie potvrdenia"] as const;
 
@@ -28,15 +31,18 @@ export default function ContactForm({
   email?: string;
 }) {
   const formId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
+  const submittingRef = useRef(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [status, setStatus] = useState<"idle" | "needs-backend">("idle");
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   function validate(form: HTMLFormElement): FormErrors {
     const data = new FormData(form);
     const next: FormErrors = {};
 
     const name = String(data.get("name") ?? "").trim();
-    const email = String(data.get("email") ?? "").trim();
+    const emailValue = String(data.get("email") ?? "").trim();
     const address = String(data.get("address") ?? "").trim();
     const phone = String(data.get("phone") ?? "").trim();
     const requestType = String(data.get("requestType") ?? "").trim();
@@ -44,36 +50,83 @@ export default function ContactForm({
     const file = data.get("file");
 
     if (!name) next.name = "Vyplňte meno.";
-    if (!email) next.email = "Vyplňte e-mail.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) next.email = "Zadajte platný e-mail.";
+    if (!emailValue) next.email = "Vyplňte e-mail.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue)) next.email = "Zadajte platný e-mail.";
     if (!address) next.address = "Vyplňte adresu bytového domu.";
     if (!phone) next.phone = "Vyplňte telefónne číslo.";
     if (!requestType) next.requestType = "Vyberte možnosť.";
     if (!message) next.message = "Vyplňte správu.";
 
     if (file instanceof File && file.size > 0) {
-      const maxBytes = 10 * 1024 * 1024;
-      if (file.size > maxBytes) next.file = "Maximálna veľkosť súboru je 10 MB.";
+      if (file.size > MAX_FILE_BYTES) next.file = "Maximálna veľkosť súboru je 3 MB.";
     }
 
     return next;
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
+
     const form = event.currentTarget;
     const nextErrors = validate(form);
     setErrors(nextErrors);
+    setErrorMessage("");
 
     if (Object.keys(nextErrors).length > 0) {
       setStatus("idle");
       return;
     }
 
-    // TODO: Connect this form to a backend email/API endpoint when available.
-    // There is currently no working form submission handler in this project.
-    setStatus("needs-backend");
+    submittingRef.current = true;
+    setStatus("submitting");
+
+    try {
+      const data = new FormData(form);
+      const name = String(data.get("name") ?? "").trim();
+      const requestType = String(data.get("requestType") ?? "").trim();
+      data.set("subject", `BYTEX web – ${requestType} – ${name}`);
+
+      // Drop empty file so Basin does not receive a blank attachment part
+      const file = data.get("file");
+      if (!(file instanceof File) || file.size === 0) {
+        data.delete("file");
+      }
+
+      const res = await fetch(BASIN_ENDPOINT, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: data,
+      });
+
+      const body = (await res.json().catch(() => null)) as {
+        success?: boolean;
+        error?: string;
+        message?: string;
+      } | null;
+
+      if (!res.ok || !body?.success) {
+        setStatus("error");
+        setErrorMessage(
+          body?.error ||
+            body?.message ||
+            "Správu sa nepodarilo odoslať. Skúste to prosím znova."
+        );
+        return;
+      }
+
+      form.reset();
+      setErrors({});
+      setStatus("success");
+    } catch {
+      setStatus("error");
+      setErrorMessage("Správu sa nepodarilo odoslať. Skúste to prosím znova.");
+    } finally {
+      submittingRef.current = false;
+    }
   }
+
+  const isSubmitting = status === "submitting";
 
   return (
     <div>
@@ -88,7 +141,26 @@ export default function ContactForm({
         {introAfterEmail}
       </p>
 
-      <form className="mt-6 space-y-3.5" onSubmit={onSubmit} noValidate>
+      <form
+        ref={formRef}
+        className="mt-6 space-y-3.5"
+        onSubmit={onSubmit}
+        noValidate
+        encType="multipart/form-data"
+        acceptCharset="UTF-8"
+      >
+        {/* Honeypot — leave empty; bots often fill hidden fields */}
+        <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+          <label htmlFor={`${formId}-company`}>Company</label>
+          <input
+            id={`${formId}-company`}
+            type="text"
+            name="_gotcha"
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
+
         <div className="grid gap-3.5 sm:grid-cols-2">
           <div>
             <label htmlFor={`${formId}-name`} className={labelClassName}>
@@ -100,6 +172,7 @@ export default function ContactForm({
               type="text"
               autoComplete="name"
               className={fieldClassName}
+              disabled={isSubmitting}
               aria-invalid={Boolean(errors.name)}
               aria-describedby={errors.name ? `${formId}-name-error` : undefined}
             />
@@ -120,6 +193,7 @@ export default function ContactForm({
               type="email"
               autoComplete="email"
               className={fieldClassName}
+              disabled={isSubmitting}
               aria-invalid={Boolean(errors.email)}
               aria-describedby={errors.email ? `${formId}-email-error` : undefined}
             />
@@ -140,6 +214,7 @@ export default function ContactForm({
               type="text"
               autoComplete="street-address"
               className={fieldClassName}
+              disabled={isSubmitting}
               aria-invalid={Boolean(errors.address)}
               aria-describedby={errors.address ? `${formId}-address-error` : undefined}
             />
@@ -160,6 +235,7 @@ export default function ContactForm({
               type="tel"
               autoComplete="tel"
               className={fieldClassName}
+              disabled={isSubmitting}
               aria-invalid={Boolean(errors.phone)}
               aria-describedby={errors.phone ? `${formId}-phone-error` : undefined}
             />
@@ -179,6 +255,7 @@ export default function ContactForm({
             id={`${formId}-requestType`}
             name="requestType"
             defaultValue=""
+            disabled={isSubmitting}
             className={`${fieldClassName} appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23161616%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%221.5%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[length:1.1rem] bg-[right_0.75rem_center] bg-no-repeat pr-9`}
             aria-invalid={Boolean(errors.requestType)}
             aria-describedby={errors.requestType ? `${formId}-requestType-error` : undefined}
@@ -207,6 +284,7 @@ export default function ContactForm({
             id={`${formId}-file`}
             name="file"
             type="file"
+            disabled={isSubmitting}
             className="mt-1.5 block w-full text-sm font-light text-charcoal/70 file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-black/[0.1] file:bg-gold/[0.08] file:px-3.5 file:py-2 file:text-sm file:font-normal file:text-gold-dark hover:file:bg-gold/15"
             aria-invalid={Boolean(errors.file)}
             aria-describedby={errors.file ? `${formId}-file-error` : undefined}
@@ -226,6 +304,7 @@ export default function ContactForm({
             id={`${formId}-message`}
             name="message"
             rows={4}
+            disabled={isSubmitting}
             className={`${fieldClassName} min-h-[6.5rem] resize-y`}
             aria-invalid={Boolean(errors.message)}
             aria-describedby={errors.message ? `${formId}-message-error` : undefined}
@@ -237,27 +316,30 @@ export default function ContactForm({
           ) : null}
         </div>
 
-        {status === "needs-backend" ? (
+        {status === "success" ? (
           <p
             className="rounded-md border border-gold/25 bg-gold/5 px-3.5 py-2.5 text-sm font-light leading-relaxed text-charcoal/80"
             role="status"
           >
-            Formulár je pripravený, no odosielanie ešte nie je napojené. Prosím napíšte nám na{" "}
-            <a
-              href={`mailto:${email}`}
-              className="text-gold transition-colors hover:text-gold-dark"
-            >
-              {email}
-            </a>
-            .
+            Správa bola úspešne odoslaná.
+          </p>
+        ) : null}
+
+        {status === "error" ? (
+          <p
+            className="rounded-md border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm font-light leading-relaxed text-red-800"
+            role="alert"
+          >
+            {errorMessage || "Správu sa nepodarilo odoslať. Skúste to prosím znova."}
           </p>
         ) : null}
 
         <button
           type="submit"
-          className="inline-flex min-h-10 items-center justify-center rounded-md bg-charcoal-deep px-7 text-sm font-light tracking-[0.18em] text-cream uppercase transition-colors duration-300 hover:bg-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:ring-offset-2"
+          disabled={isSubmitting}
+          className="inline-flex min-h-10 items-center justify-center rounded-md bg-charcoal-deep px-7 text-sm font-light tracking-[0.18em] text-cream uppercase transition-colors duration-300 hover:bg-charcoal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          Odoslať
+          {isSubmitting ? "Odosielam…" : "Odoslať"}
         </button>
       </form>
     </div>
