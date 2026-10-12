@@ -12,9 +12,19 @@ const defaultIntroBeforeEmail =
 const defaultIntroAfterEmail =
   '" alebo vyplnením kontaktného formuláru.';
 
-type FormErrors = Partial<
-  Record<"name" | "email" | "address" | "phone" | "requestType" | "message" | "file", string>
->;
+/** Basin email labels = these FormData keys (keep `email` for Reply-To). */
+const FIELD = {
+  name: "Meno",
+  email: "email",
+  address: "Adresa bytového domu",
+  phone: "Telefónne číslo",
+  requestType: "Typ požiadavky",
+  message: "Správa",
+  file: "Súbor",
+} as const;
+
+type FieldKey = keyof typeof FIELD;
+type FormErrors = Partial<Record<FieldKey, string>>;
 
 const fieldClassName =
   "mt-1.5 w-full rounded-md border border-black/[0.1] bg-white px-3.5 py-2.5 text-sm font-light text-charcoal-deep outline-none transition-[border-color,box-shadow] duration-200 placeholder:text-charcoal/35 focus:border-gold/55 focus:ring-1 focus:ring-gold/25";
@@ -41,13 +51,13 @@ export default function ContactForm({
     const data = new FormData(form);
     const next: FormErrors = {};
 
-    const name = String(data.get("name") ?? "").trim();
-    const emailValue = String(data.get("email") ?? "").trim();
-    const address = String(data.get("address") ?? "").trim();
-    const phone = String(data.get("phone") ?? "").trim();
-    const requestType = String(data.get("requestType") ?? "").trim();
-    const message = String(data.get("message") ?? "").trim();
-    const file = data.get("file");
+    const name = String(data.get(FIELD.name) ?? "").trim();
+    const emailValue = String(data.get(FIELD.email) ?? "").trim();
+    const address = String(data.get(FIELD.address) ?? "").trim();
+    const phone = String(data.get(FIELD.phone) ?? "").trim();
+    const requestType = String(data.get(FIELD.requestType) ?? "").trim();
+    const message = String(data.get(FIELD.message) ?? "").trim();
+    const file = data.get(FIELD.file);
 
     if (!name) next.name = "Vyplňte meno.";
     if (!emailValue) next.email = "Vyplňte e-mail.";
@@ -83,14 +93,14 @@ export default function ContactForm({
 
     try {
       const data = new FormData(form);
-      const name = String(data.get("name") ?? "").trim();
-      const requestType = String(data.get("requestType") ?? "").trim();
+      const name = String(data.get(FIELD.name) ?? "").trim();
+      const requestType = String(data.get(FIELD.requestType) ?? "").trim();
       data.set("subject", `BYTEX web – ${requestType} – ${name}`);
 
       // Drop empty file so Basin does not receive a blank attachment part
-      const file = data.get("file");
+      const file = data.get(FIELD.file);
       if (!(file instanceof File) || file.size === 0) {
-        data.delete("file");
+        data.delete(FIELD.file);
       }
 
       const res = await fetch(BASIN_ENDPOINT, {
@@ -168,7 +178,7 @@ export default function ContactForm({
             </label>
             <input
               id={`${formId}-name`}
-              name="name"
+              name={FIELD.name}
               type="text"
               autoComplete="name"
               className={fieldClassName}
@@ -189,7 +199,7 @@ export default function ContactForm({
             </label>
             <input
               id={`${formId}-email`}
-              name="email"
+              name={FIELD.email}
               type="email"
               autoComplete="email"
               className={fieldClassName}
@@ -210,7 +220,7 @@ export default function ContactForm({
             </label>
             <input
               id={`${formId}-address`}
-              name="address"
+              name={FIELD.address}
               type="text"
               autoComplete="street-address"
               className={fieldClassName}
@@ -231,7 +241,7 @@ export default function ContactForm({
             </label>
             <input
               id={`${formId}-phone`}
-              name="phone"
+              name={FIELD.phone}
               type="tel"
               autoComplete="tel"
               className={fieldClassName}
@@ -253,7 +263,7 @@ export default function ContactForm({
           </label>
           <select
             id={`${formId}-requestType`}
-            name="requestType"
+            name={FIELD.requestType}
             defaultValue=""
             disabled={isSubmitting}
             className={`${fieldClassName} appearance-none bg-[url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23161616%22%3E%3Cpath stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%221.5%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E')] bg-[length:1.1rem] bg-[right_0.75rem_center] bg-no-repeat pr-9`}
@@ -282,7 +292,7 @@ export default function ContactForm({
           </label>
           <input
             id={`${formId}-file`}
-            name="file"
+            name={FIELD.file}
             type="file"
             disabled={isSubmitting}
             className="mt-1.5 block w-full text-sm font-light text-charcoal/70 file:mr-3 file:cursor-pointer file:rounded-md file:border file:border-black/[0.1] file:bg-gold/[0.08] file:px-3.5 file:py-2 file:text-sm file:font-normal file:text-gold-dark hover:file:bg-gold/15"
@@ -302,7 +312,7 @@ export default function ContactForm({
           </label>
           <textarea
             id={`${formId}-message`}
-            name="message"
+            name={FIELD.message}
             rows={4}
             disabled={isSubmitting}
             className={`${fieldClassName} min-h-[6.5rem] resize-y`}
