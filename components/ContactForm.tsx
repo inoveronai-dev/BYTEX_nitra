@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState, type FormEvent } from "react";
 
-const BASIN_ENDPOINT = "https://usebasin.com/f/d638cf638315";
+const BASIN_ENDPOINT = "https://usebasin.com/f/62bdf96ba920";
 const MAX_FILE_BYTES = 3 * 1024 * 1024;
 
 const requestOptions = ["Žiadosť", "Porucha", "Zaslanie potvrdenia"] as const;
