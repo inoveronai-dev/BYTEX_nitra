@@ -3,6 +3,8 @@
 :root {
   --background: #f9f9f6;
   --foreground: #111111;
+  /* Sticky header with logo (~165–180px) + small gap below */
+  --site-header-offset: 12rem;
 }
 
 @theme inline {
@@ -24,6 +26,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--site-header-offset);
 }
 
 /* Pre-React cover for first homepage visit — prevents homepage flash before splash mounts */

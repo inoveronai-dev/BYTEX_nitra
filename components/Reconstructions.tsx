@@ -138,7 +138,7 @@ export default function Reconstructions({ projects = [] }: { projects?: Project[
   return (
     <section
       id="rekonstrukcie"
-      className="section-cream scroll-mt-28 py-16 sm:scroll-mt-32 sm:py-20 lg:py-24"
+      className="section-cream py-16 sm:py-20 lg:py-24"
     >
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <Reveal>

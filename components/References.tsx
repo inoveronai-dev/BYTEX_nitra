@@ -280,7 +280,7 @@ export default function References({ items = [] }: { items?: ReferenceItem[] }) 
     <section
       ref={sectionRef}
       id="referencie"
-      className="section-cream scroll-mt-24 py-16 sm:py-20 lg:py-24"
+      className="section-cream py-16 sm:py-20 lg:py-24"
     >
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">

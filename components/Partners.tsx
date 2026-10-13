@@ -9,7 +9,7 @@ type PartnerItem = {
 
 export default function Partners({ items = [] }: { items?: PartnerItem[] }) {
   return (
-    <section id="partneri" className="section-dark scroll-mt-24 py-14 sm:py-16 lg:py-20">
+    <section id="partneri" className="section-dark py-14 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <p className="section-eyebrow section-eyebrow--on-dark text-center">
           Partneri

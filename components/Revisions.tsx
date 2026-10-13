@@ -188,7 +188,7 @@ export default function Revisions({
   }, [hiddenByDefault]);
 
   return (
-    <section id="revizie" className="section-cream scroll-mt-24 py-16 sm:py-20 lg:py-24">
+    <section id="revizie" className="section-cream py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-5xl px-6 sm:px-8">
         <h2 className="font-serif text-3xl font-light tracking-tight sm:text-4xl lg:text-5xl">
           <span className="text-charcoal-deep">Odborné skúšky</span>{" "}

@@ -33,7 +33,7 @@ export default function Benefits({ items }: { items?: BenefitItem[] }) {
         }))
       : [];
   return (
-    <section id="vyhody" className="section-cream scroll-mt-24 py-24 sm:py-32 lg:py-40">
+    <section id="vyhody" className="section-cream py-24 sm:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-16 xl:gap-20">
           {/* Left: editorial heading + strong visual */}

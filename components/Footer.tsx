@@ -1,3 +1,6 @@
+import { Suspense } from "react";
+import FooterStats from "@/components/FooterStats";
+
 function FacebookIcon() {
   return (
     <svg className="h-[1.125rem] w-[1.125rem]" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
@@ -88,9 +91,12 @@ export default function Footer({
           </div>
         </div>
 
-        <p className="mt-6 border-t border-white/8 pt-5 text-xs font-light text-white/35">
-          {copyrightText}
-        </p>
+        <div className="mt-6 border-t border-white/8 pt-5">
+          <p className="text-xs font-light text-white/35">{copyrightText}</p>
+          <Suspense fallback={null}>
+            <FooterStats />
+          </Suspense>
+        </div>
       </div>
     </footer>
   );

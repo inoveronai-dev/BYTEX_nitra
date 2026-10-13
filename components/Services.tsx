@@ -14,7 +14,7 @@ type ServiceItem = {
 export default function Services({ items = [] }: { items?: ServiceItem[] }) {
   const services = items;
   return (
-    <section id="sluzby" className="scroll-mt-24 bg-[#111111] py-24 text-cream sm:py-32 lg:py-40">
+    <section id="sluzby" className="bg-[#111111] py-24 text-cream sm:py-32 lg:py-40">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <Reveal>
           <p className="section-eyebrow section-eyebrow--on-dark">

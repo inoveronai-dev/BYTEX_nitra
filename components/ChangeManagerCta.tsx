@@ -280,7 +280,7 @@ export default function ChangeManagerCta({ data = null }: { data?: ChangeManager
       */}
       <section
         id="zmena-spravcu"
-        className="relative scroll-mt-28 h-[340px] sm:scroll-mt-32 sm:h-[420px] lg:h-[460px] [clip-path:inset(0)]"
+        className="relative h-[340px] sm:h-[420px] lg:h-[460px] [clip-path:inset(0)]"
         aria-labelledby="change-manager-heading"
       >
         <div

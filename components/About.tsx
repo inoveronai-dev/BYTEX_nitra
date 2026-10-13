@@ -52,7 +52,7 @@ export default function About({
     <section
       ref={ref}
       id="o-nas"
-      className="section-cream scroll-mt-0 py-24 sm:py-32 lg:py-40"
+      className="section-cream py-24 sm:py-32 lg:py-40"
     >
       <div className="mx-auto max-w-3xl px-6 text-center sm:px-8">
         <p

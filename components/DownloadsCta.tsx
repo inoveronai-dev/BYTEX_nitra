@@ -5,7 +5,7 @@ export default function DownloadsCta() {
   return (
     <section
       id="na-stiahnutie"
-      className="scroll-mt-24 border-y border-black/[0.06] bg-cream py-14 sm:py-16"
+      className="border-y border-black/[0.06] bg-cream py-14 sm:py-16"
       aria-labelledby="downloads-cta-heading"
     >
       <div className="mx-auto max-w-6xl px-6 sm:px-8">

@@ -55,7 +55,7 @@ export default function Contact({
   const intro = contact?.clientCentreIntro || "";
 
   return (
-    <section id="kontakt" className="section-cream scroll-mt-28 py-14 sm:scroll-mt-32 sm:py-16 lg:py-20">
+    <section id="kontakt" className="section-cream py-14 sm:py-16 lg:py-20">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
         <div className="grid gap-8 lg:grid-cols-12 lg:items-start lg:gap-10 xl:gap-12">
           {/* Left: client centre information */}
