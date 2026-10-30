@@ -192,6 +192,7 @@
         {
           "title": "Nová položka",
           "description": "",
+          "isActive": false,
           "prices": [
             {
               "amount": ""
