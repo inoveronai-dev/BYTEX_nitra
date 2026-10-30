@@ -47,5 +47,12 @@
     "imagePath": "/uploads/references/743be197-0f60-4ebb-838d-aaba12e6e6c2.jpg",
     "isActive": true,
     "sortOrder": 6
+  },
+  {
+    "id": 8,
+    "name": "TEST CSRF ORIGIN 1793362174",
+    "imagePath": "/uploads/references/11b8d8e6-0838-4ada-b976-6bfe94334276.jpg",
+    "isActive": false,
+    "sortOrder": 7
   }
 ]
