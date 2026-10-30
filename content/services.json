@@ -7,7 +7,7 @@
     "imageClassName": "object-left-bottom",
     "imageOverlayClassName": "bg-gradient-to-t from-[#111111]/25 via-transparent to-black/10",
     "isActive": true,
-    "sortOrder": 1
+    "sortOrder": 0
   },
   {
     "id": 2,
@@ -17,7 +17,7 @@
     "imageClassName": "object-center",
     "imageOverlayClassName": "bg-gradient-to-t from-[#111111]/40 via-transparent to-transparent",
     "isActive": true,
-    "sortOrder": 0
+    "sortOrder": 1
   },
   {
     "id": 3,
