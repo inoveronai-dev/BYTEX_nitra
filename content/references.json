@@ -47,5 +47,12 @@
     "imagePath": "/uploads/references/743be197-0f60-4ebb-838d-aaba12e6e6c2.jpg",
     "isActive": true,
     "sortOrder": 6
+  },
+  {
+    "id": 8,
+    "name": "Janka Kráľa 1045/63",
+    "imagePath": "/uploads/references/e1bbc173-83b1-44e8-a3bd-e9daa2cd532c.jpg",
+    "isActive": true,
+    "sortOrder": 7
   }
 ]
