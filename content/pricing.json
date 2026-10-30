@@ -27,11 +27,11 @@
           ]
         },
         {
-          "title": "Platforma Resitech",
+          "title": "Digitalizácia bytového domu",
           "description": "Komunikácia, elektronické hlasovanie, oznamy, dokumenty, tlačivá a iné.",
           "prices": [
             {
-              "amount": "0,49 €",
+              "amount": "0,80 €",
               "unit": "1 byt/mesiac"
             }
           ]
@@ -186,6 +186,15 @@
           "prices": [
             {
               "amount": "8 €"
+            }
+          ]
+        },
+        {
+          "title": "Nová položka",
+          "description": "",
+          "prices": [
+            {
+              "amount": ""
             }
           ]
         }
