@@ -49,5 +49,21 @@
     ],
     "isActive": true,
     "sortOrder": 2
+  },
+  {
+    "id": 4,
+    "slug": "beethovenova",
+    "title": "Beethovenova 2-4, Nitra",
+    "yearStatus": "2026",
+    "investment": "Celková investícia 450 000€.",
+    "beforeImagePath": "/uploads/reconstructions/dbc82e97-2b09-4f12-aac6-f128f02851ba.jpg",
+    "afterImagePath": "/uploads/reconstructions/3a4f7769-2d15-4ec2-b960-276c567a1719.jpg",
+    "beforeText": "eee",
+    "afterText": "Bytový dom po rekonštrukcii 2025. ",
+    "facts": [
+      "eee"
+    ],
+    "isActive": true,
+    "sortOrder": 3
   }
 ]
