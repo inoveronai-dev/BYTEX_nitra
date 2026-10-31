@@ -148,16 +148,10 @@ export default function Reconstructions({ projects = [] }: { projects?: Project[
           </h2>
         </Reveal>
 
-        <div className="mt-9 grid gap-10 sm:mt-10 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-12 lg:mt-11 lg:grid-cols-3 lg:gap-0 lg:divide-x lg:divide-black/[0.08]">
+        <div className="mt-9 grid grid-cols-1 gap-x-8 gap-y-10 sm:mt-10 sm:grid-cols-2 sm:gap-y-12 lg:mt-11 lg:grid-cols-3">
           {projects.map((project, index) => (
-            <Reveal key={project.id} delayMs={index * 80}>
-              <div
-                className={`h-full lg:px-6 ${index === 0 ? "lg:pl-0" : ""} ${
-                  index === projects.length - 1 ? "lg:pr-0" : ""
-                }`}
-              >
-                <ProjectShowcase project={project} />
-              </div>
+            <Reveal key={project.id} className="h-full min-w-0" delayMs={index * 80}>
+              <ProjectShowcase project={project} />
             </Reveal>
           ))}
         </div>
